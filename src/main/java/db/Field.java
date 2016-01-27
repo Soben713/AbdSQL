@@ -13,4 +13,9 @@ public class Field {
         this.name = name;
         this.fieldType = fieldType;
     }
+
+    @Override
+    public String toString() {
+        return name + "[" + fieldType + "]";
+    }
 }

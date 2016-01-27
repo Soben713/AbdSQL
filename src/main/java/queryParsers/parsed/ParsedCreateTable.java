@@ -1,5 +1,6 @@
 package queryParsers.parsed;
 
+import db.Field;
 import db.fieldType.FieldType;
 
 import java.util.ArrayList;
@@ -9,13 +10,10 @@ import java.util.ArrayList;
  */
 public class ParsedCreateTable extends Parsed {
     public String tableName;
-    public ArrayList<FieldType> fieldTypes;
+    public ArrayList<Field> fields;
 
-    public ParsedCreateTable() {
-    }
-
-    public ParsedCreateTable(String tableName, ArrayList<FieldType> fieldTypes) {
+    public ParsedCreateTable(String tableName, ArrayList<Field> fields) {
         this.tableName = tableName;
-        this.fieldTypes = fieldTypes;
+        this.fields = fields;
     }
 }

@@ -1,6 +1,9 @@
 CREATE TABLE STT (ID INT, FNAME VARCHAR, LNAME VARCHAR);
-INSERT INTO STT values (1, "soheil", null);
-INSERT INTO STT values (2, "mahsa", "derakhshan");
-INSERT INTO STT values ("3", "x", "y");
+INSERT INTO STT values (1, "Soheil", "Behnezhad");
+INSERT INTO STT values (2, "Mahsa", "Derakhshan");
+INSERT INTO STT values (3, "Sepehr", "Behnezhad");
 CREATE TABLE COT (ID INT, NAME VARCHAR, VAHED INT);
 INSERT INTO COT VALUES (1, "db", 3);
+UPDATE STT SET ID=1+2*3+ID WHERE TRUE;
+UPDATE STT SET LNAME=FNAME+" SALMANI" where LNAME="Behnezhad";
+UPDATE STT SET ID=ID-9 WHERE TRUE;

@@ -9,28 +9,28 @@ import java.util.ArrayList;
  */
 public class Table {
     public String name;
-    public ArrayList<FieldType> fieldTypes = new ArrayList<FieldType>();
+    public ArrayList<Field> fields = new ArrayList<Field>();
     public ArrayList<Record> records = new ArrayList<Record>();
 
     public Table() {
     }
 
-    public Table(String name, ArrayList<FieldType> fieldTypes) {
+    public Table(String name, ArrayList<Field> fields) {
         this.name = name;
-        this.fieldTypes = fieldTypes;
+        this.fields = fields;
     }
 
-    public Table(String name, ArrayList<FieldType> fieldTypes, ArrayList<Record> records) {
+    public Table(String name, ArrayList<Field> fields, ArrayList<Record> records) {
         this.name = name;
-        this.fieldTypes = fieldTypes;
+        this.fields = fields;
         this.records = records;
     }
 
     @Override
     public String toString() {
         String r = "@" + name + "{";
-        for(FieldType ft: fieldTypes)
-            r += ft.toString() + " ";
+        for(Field f: fields)
+            r += f.toString() + " ";
         r += "}[";
         for(Record record: records)
             r += record.toString();

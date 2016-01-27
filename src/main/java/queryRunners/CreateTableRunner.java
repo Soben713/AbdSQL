@@ -15,9 +15,10 @@ public class CreateTableRunner extends QueryRunner<ParsedCreateTable> {
 
     @Override
     public void run(ParsedCreateTable parsed) {
-        Table t = new Table(parsed.tableName, parsed.fieldTypes);
+        Table t = new Table(parsed.tableName, parsed.fields);
         DB.getInstance().tables.put(parsed.tableName, t);
         System.out.println("TABLE CREATED");
-        System.err.println("Table: " + t);
+        System.err.println("Created: " + t);
     }
+
 }

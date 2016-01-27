@@ -1,16 +1,15 @@
 package queryParsers;
 
 import db.Cell;
-import db.Field;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.insert.Insert;
 import queryParsers.parsed.ParsedInsert;
 import queryParsers.utils.DummyVisitor;
+import utils.Convertor;
 
 import java.util.ArrayList;
 
@@ -43,8 +42,7 @@ public class InsertParser extends QueryParser<Insert> {
 
         @Override
         public void visit(LongValue longValue) {
-            Long l = (Long)(longValue.getValue());
-            cells.add(new Cell(Cell.CellType.INTEGER, (Integer)l.intValue()));
+            cells.add(new Cell(Cell.CellType.INTEGER, Convertor.longToInteger(longValue.getValue())));
         }
 
         @Override
@@ -57,7 +55,7 @@ public class InsertParser extends QueryParser<Insert> {
             /*
             JSQLParser stupidly parses string values into a Column
              */
-            cells.add(new Cell(Cell.CellType.VARCHAR, column.getColumnName()));
+            cells.add(new Cell(Cell.CellType.VARCHAR, column.getColumnName().replace("\"", "")));
         }
     }
 
