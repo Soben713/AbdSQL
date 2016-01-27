@@ -1,0 +1,6 @@
+CREATE TABLE STT (ID INT, FNAME VARCHAR, LNAME VARCHAR);
+INSERT INTO STT values (1, "soheil", null);
+INSERT INTO STT values (2, "mahsa", "derakhshan");
+INSERT INTO STT values ("3", "x", "y");
+CREATE TABLE COT (ID INT, NAME VARCHAR, VAHED INT);
+INSERT INTO COT VALUES (1, "db", 3);

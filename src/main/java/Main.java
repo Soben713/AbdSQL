@@ -1,22 +1,39 @@
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
+import queryManager.StatementToQueryParser;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 /**
  * Created by user on 26/01/16 AD.
  */
 public class Main {
-    public static void main(String args[]){
-        String sql1 = "CREATE TABLE TABLE_NAME (COLUMN_NAME1 DATA_TYPE, COLUMN_NAME2 DATA_TYPE);";
-        try {
-            Statement statement = CCJSqlParserUtil.parse(sql1);
-            if(statement instanceof CreateTable) {
-                CreateTable ct = (CreateTable) statement;
-                System.out.println(ct.getTable().getName());
-            }
+    private static boolean DEBUG = true;
 
-        } catch (JSQLParserException e) {
+    public static void main(String args[]){
+        try {
+            Scanner scanner = null;
+            if(!DEBUG)
+                scanner = new Scanner(System.in);
+            else
+                scanner = new Scanner(new FileReader(new File("input.txt")));
+            while (true) {
+                try {
+                    String queryString = scanner.nextLine();
+                    Statement s = CCJSqlParserUtil.parse(queryString);
+                    new StatementToQueryParser().handleStatement(s);
+                } catch (JSQLParserException e) {
+                    System.err.println("Invalid input");
+                } catch (NoSuchElementException e) {
+                    return;
+                }
+            }
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
