@@ -19,6 +19,8 @@ public class Cell {
 
     @Override
     public String toString() {
+        if(type == CellType.NULL)
+            return "NULL";
         return ""+value;
     }
 

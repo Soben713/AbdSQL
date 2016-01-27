@@ -6,13 +6,13 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 
 /**
  * Because you need to create a lot of useless "visit" functions when using the visitor pattern
  * I created this dummyparser class that has an empty implementation for the needed functions.
  */
-public class DummyVisitor implements ItemsListVisitor, ExpressionVisitor{
+public class DummyVisitor implements ItemsListVisitor, ExpressionVisitor, SelectVisitor {
     /*
     All methods below are automatically created by Intellij, template is:
 
@@ -364,6 +364,24 @@ public class DummyVisitor implements ItemsListVisitor, ExpressionVisitor{
     public void visit(MultiExpressionList multiExpressionList) {
     /**/
         Object arg = multiExpressionList;
+        System.err.println("visit " + arg.getClass().getName() + " was called: " + arg.toString());
+    }
+
+    public void visit(PlainSelect plainSelect) {
+    /**/
+        Object arg = plainSelect;
+        System.err.println("visit " + arg.getClass().getName() + " was called: " + arg.toString());
+    }
+
+    public void visit(SetOperationList setOperationList) {
+    /**/
+        Object arg = setOperationList;
+        System.err.println("visit " + arg.getClass().getName() + " was called: " + arg.toString());
+    }
+
+    public void visit(WithItem withItem) {
+    /**/
+        Object arg = withItem;
         System.err.println("visit " + arg.getClass().getName() + " was called: " + arg.toString());
     }
 }

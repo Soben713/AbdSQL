@@ -4,6 +4,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.update.Update;
 import queryParsers.*;
 import queryRunners.*;
@@ -22,6 +23,8 @@ public class QueryManager {
             return new ParserAndRunner(new UpdateRunner(), new UpdateParser());
         else if(s instanceof Delete)
             return new ParserAndRunner(new DeleteRunner(), new DeleteParser());
+        else if(s instanceof Select)
+            return new ParserAndRunner(new SelectRunner(), new SelectParser());
         return null;
     }
 

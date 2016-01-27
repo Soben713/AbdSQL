@@ -18,8 +18,6 @@ public class Main {
     private static boolean DEBUG = true;
 
     public static void main(String args[]) throws Exception {
-        System.out.println(ComputableValue.addParanthesis("3+2+4*5"));
-
         try {
             Scanner scanner = null;
             if(!DEBUG)
@@ -29,6 +27,8 @@ public class Main {
             while (true) {
                 try {
                     String queryString = scanner.nextLine();
+                    if(queryString.equals("exit"))
+                        return;
                     queryString = QueryManager.relax(queryString);
                     Statement s = CCJSqlParserUtil.parse(queryString);
                     new QueryManager().handleStatement(s);

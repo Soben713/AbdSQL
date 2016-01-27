@@ -45,6 +45,11 @@ public class WhereCondition {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return this.whereExpression.toString();
+    }
+
     private class WhereConditionExpressionVisitor extends DummyVisitor {
         Record record;
 

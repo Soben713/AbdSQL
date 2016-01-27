@@ -14,7 +14,7 @@ public class UpdateRunner extends QueryRunner<ParsedUpdate> {
     public void run(ParsedUpdate parsedQuery) {
         try {
             Table t = DB.getInstance().getTable(parsedQuery.tableName);
-            for(Record r: t.records) {
+            for(Record r: t.getRecords()) {
                 if(parsedQuery.where.evaluate(r))
                     r.getCell(parsedQuery.columnName).setValue(parsedQuery.computableValue.compute(r));
             }

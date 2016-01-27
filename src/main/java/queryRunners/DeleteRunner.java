@@ -13,9 +13,9 @@ public class DeleteRunner extends QueryRunner<ParsedDelete> {
     public void run(ParsedDelete parsedQuery) {
         try {
             Table t = DB.getInstance().getTable(parsedQuery.getTableName());
-            for(int i=0; i<t.records.size(); i++) {
-                if(parsedQuery.getWhereCondition().evaluate(t.records.get(i))){
-                    t.records.remove(i);
+            for(int i=0; i<t.getRecords().size(); i++) {
+                if(parsedQuery.getWhereCondition().evaluate(t.getRecords().get(i))){
+                    t.getRecords().remove(i);
                     i = i-1;
                 }
             }

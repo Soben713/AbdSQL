@@ -10,14 +10,18 @@ import java.util.ArrayList;
 public class Record {
     public ArrayList<FieldCell> fieldCells;
 
+    public Record() {
+        fieldCells = new ArrayList<FieldCell>();
+    }
+
     public Record(ArrayList<FieldCell> fieldCells) {
         this.fieldCells = fieldCells;
     }
 
     public Cell getCell(String fieldName) {
         for(FieldCell fc: fieldCells)
-            if(fc.field.name.equals(fieldName))
-                return fc.cell;
+            if(fc.getField().name.equals(fieldName))
+                return fc.getCell();
         return null;
     }
 

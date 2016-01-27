@@ -19,12 +19,12 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 
             ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
             for(int i=0; i<parsedInsert.cells.size(); i++) {
-                fieldCells.add(new FieldCell(t.fields.get(i), parsedInsert.cells.get(i)));
+                fieldCells.add(new FieldCell(t.getFields().get(i), parsedInsert.cells.get(i)));
             }
 
             Record r = new Record(fieldCells);
 
-            t.records.add(r);
+            t.getRecords().add(r);
             System.out.println("RECORD INSERTED");
             System.err.println("Inserted to:" + t);
         } catch (NoSuchTableException e) {
