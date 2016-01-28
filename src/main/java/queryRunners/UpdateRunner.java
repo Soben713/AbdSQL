@@ -6,6 +6,7 @@ import db.Record;
 import db.Table;
 import db.TableIndex;
 import queryParsers.parsed.ParsedUpdate;
+import utils.Log;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class UpdateRunner extends QueryRunner<ParsedUpdate> {
 
             t.updateIndexes();
 
-            System.err.println("Updated:" + t);
+            Log.error("Updated:", t);
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         }

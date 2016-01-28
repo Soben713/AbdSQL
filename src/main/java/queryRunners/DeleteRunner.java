@@ -4,6 +4,7 @@ import Exceptions.NoSuchTableException;
 import db.DB;
 import db.Table;
 import queryParsers.parsed.ParsedDelete;
+import utils.Log;
 
 /**
  * Created by user on 27/01/16 AD.
@@ -21,7 +22,7 @@ public class DeleteRunner extends QueryRunner<ParsedDelete> {
             }
 
             t.updateIndexes();
-            System.err.println("Deleted:" + t);
+            Log.error("Deleted", t);
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         }

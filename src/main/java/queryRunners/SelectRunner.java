@@ -4,6 +4,7 @@ import Exceptions.NoSuchTableException;
 import db.*;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import queryParsers.parsed.ParsedSelect;
+import utils.Log;
 
 /**
  * Created by user on 27/01/16 AD.
@@ -22,7 +23,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
             }
 
             Table subTable = from.getSubTableIfPossible(parsed.getWhereCondition());
-            System.err.println("Working on (sub)table:" + subTable);
+            Log.error("Working on (sub)table:", subTable);
 
             for(Record r: subTable.getRecords()) {
                 if(parsed.getWhereCondition().evaluate(r)){
@@ -35,7 +36,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
                 }
             }
 
-            System.err.println("Result:" + result);
+            Log.error("Result:", result);
             result.printTable();
 
         } catch (NoSuchTableException e) {

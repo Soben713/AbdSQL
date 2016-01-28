@@ -5,6 +5,7 @@ import db.Table;
 import db.fieldType.FieldType;
 import queryParsers.CreateTableParser;
 import queryParsers.parsed.ParsedCreateTable;
+import utils.Log;
 
 import java.util.ArrayList;
 
@@ -17,8 +18,8 @@ public class CreateTableRunner extends QueryRunner<ParsedCreateTable> {
     public void run(ParsedCreateTable parsed) {
         Table t = new Table(parsed.tableName, parsed.fields);
         DB.getInstance().tables.put(parsed.tableName, t);
-        System.out.println("TABLE CREATED");
-        System.err.println("Created: " + t);
+        Log.println("TABLE CREATED");
+        Log.error("Created:", t);
     }
 
 }

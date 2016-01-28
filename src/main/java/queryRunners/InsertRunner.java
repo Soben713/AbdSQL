@@ -3,6 +3,7 @@ package queryRunners;
 import Exceptions.NoSuchTableException;
 import db.*;
 import queryParsers.parsed.ParsedInsert;
+import utils.Log;
 
 import java.util.ArrayList;
 
@@ -12,8 +13,6 @@ import java.util.ArrayList;
 public class InsertRunner extends QueryRunner<ParsedInsert> {
     @Override
     public void run(ParsedInsert parsedInsert) {
-        String tableName = parsedInsert.tableName;
-
         try {
             Table t = DB.getInstance().getTable(parsedInsert.tableName);
 
@@ -24,11 +23,15 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 
             Record r = new Record(fieldCells);
 
+            for(TableIndex index: t.getIndexes())
+                index.insert(r);
+
             t.getRecords().add(r);
-            System.out.println("RECORD INSERTED");
-            System.err.println("Inserted to:" + t);
+
+            Log.println("RECORD INSERTED");
+            Log.error("Inserted to:", t);
         } catch (NoSuchTableException e) {
-            System.err.println("No such table");
+            Log.error("No such table");
         }
     }
 }

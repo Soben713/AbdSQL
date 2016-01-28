@@ -2,8 +2,11 @@ package db;
 
 import db.fieldType.FieldType;
 import queryRunners.utils.WhereCondition;
+import utils.Log;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by user on 26/01/16 AD.
@@ -11,7 +14,7 @@ import java.util.ArrayList;
 public class Table {
     private String name;
     private ArrayList<Field> fields = new ArrayList<Field>();
-    private ArrayList<Record> records = new ArrayList<Record>();
+    public List<Record> records = new ArrayList<Record>();
     private ArrayList<TableIndex> indexes = new ArrayList<TableIndex>();
 
     public Table() {
@@ -64,7 +67,7 @@ public class Table {
         this.fields = fields;
     }
 
-    public ArrayList<Record> getRecords() {
+    public List<Record> getRecords() {
         return records;
     }
 
@@ -81,22 +84,22 @@ public class Table {
 
     public void printTable() {
         if(records.size()==0){
-            System.out.println("NO RESULTS");
+            Log.println("NO RESULTS");
             return;
         }
         for(int i=0; i<fields.size(); i++)
             if(i==fields.size()-1)
-                System.out.print(fields.get(i).name);
+                Log.print(fields.get(i).name);
             else
-                System.out.print(fields.get(i).name + ",");
-        System.out.println();
+                Log.print(fields.get(i).name + ",");
+        Log.println();
         for(Record r: records) {
             for(int i=0; i<r.fieldCells.size(); i++)
                 if(i==r.fieldCells.size()-1)
-                    System.out.print(r.fieldCells.get(i).getCell().toString());
+                    Log.print(r.fieldCells.get(i).getCell().toString());
                 else
-                    System.out.print(r.fieldCells.get(i).getCell().toString() + ",");
-            System.out.println();
+                    Log.print(r.fieldCells.get(i).getCell().toString() + ",");
+            Log.println();
         }
 
     }
@@ -108,16 +111,13 @@ public class Table {
             updated = false;
             for(TableIndex index: subTable.getIndexes()) {
                 if(whereCondition.isTableIndexHelpful(index).isHelpful()){
-//                    System.err.println("Table name:" + subTable.getName() + " useful index:" + index.getName());
                     Object value = whereCondition.isTableIndexHelpful(index).getValue();
                     subTable = index.subTableWhenIndexEquals(value);
                     updated = true;
                     break;
                 }
             }
-            System.err.println("Indexes:" + subTable.getIndexes() + " subtable:" + subTable);
         } while (updated);
-        System.err.println("Indexes:" + subTable.getIndexes() + " subtable:" + subTable);
         return subTable;
     }
 
