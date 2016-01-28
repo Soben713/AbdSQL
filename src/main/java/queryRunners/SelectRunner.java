@@ -17,19 +17,24 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
         try {
             Table from = DB.getInstance().getTable(parsed.getTableName());
             for(SelectItem selectItem: parsed.getSelectItems()) {
-                Field oField = from.getFields().get((from.getFieldIndex(selectItem.toString())));
+                Field oField = from.getFields().get((from.getField(selectItem.toString())));
                 result.getFields().add(new Field(oField.name, oField.fieldType));
             }
-            for(Record r: from.getRecords()) {
+
+            Table subTable = from.getSubTableIfPossible(parsed.getWhereCondition());
+            System.err.println("Working on (sub)table:" + subTable);
+
+            for(Record r: subTable.getRecords()) {
                 if(parsed.getWhereCondition().evaluate(r)){
                     Record nr = new Record();
                     for(Field field: result.getFields()) {
-                        Cell oCell = r.fieldCells.get(from.getFieldIndex(field.name)).getCell();
+                        Cell oCell = r.fieldCells.get(subTable.getField(field.name)).getCell();
                         nr.fieldCells.add(new FieldCell(field, new Cell(oCell.getType(), oCell.getValue())));
                     }
                     result.getRecords().add(nr);
                 }
             }
+
             System.err.println("Result:" + result);
             result.printTable();
 

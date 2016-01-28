@@ -19,6 +19,8 @@ public class DeleteRunner extends QueryRunner<ParsedDelete> {
                     i = i-1;
                 }
             }
+
+            t.updateIndexes();
             System.err.println("Deleted:" + t);
         } catch (NoSuchTableException e) {
             e.printStackTrace();

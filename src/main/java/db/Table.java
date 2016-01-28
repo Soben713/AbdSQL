@@ -1,6 +1,7 @@
 package db;
 
 import db.fieldType.FieldType;
+import queryRunners.utils.WhereCondition;
 
 import java.util.ArrayList;
 
@@ -11,6 +12,7 @@ public class Table {
     private String name;
     private ArrayList<Field> fields = new ArrayList<Field>();
     private ArrayList<Record> records = new ArrayList<Record>();
+    private ArrayList<TableIndex> indexes = new ArrayList<TableIndex>();
 
     public Table() {
     }
@@ -46,6 +48,14 @@ public class Table {
         this.name = name;
     }
 
+    public ArrayList<TableIndex> getIndexes() {
+        return indexes;
+    }
+
+    public void setIndexes(ArrayList<TableIndex> indexes) {
+        this.indexes = indexes;
+    }
+
     public ArrayList<Field> getFields() {
         return fields;
     }
@@ -62,7 +72,7 @@ public class Table {
         this.records = records;
     }
 
-    public int getFieldIndex(String s) {
+    public int getField(String s) {
         for(int i=0; i<fields.size(); i++)
             if(fields.get(i).name.equals(s))
                 return i;
@@ -89,5 +99,34 @@ public class Table {
             System.out.println();
         }
 
+    }
+
+    public Table getSubTableIfPossible(WhereCondition whereCondition) {
+        boolean updated;
+        Table subTable = this;
+        do {
+            updated = false;
+            for(TableIndex index: subTable.getIndexes()) {
+                if(whereCondition.isTableIndexHelpful(index).isHelpful()){
+//                    System.err.println("Table name:" + subTable.getName() + " useful index:" + index.getName());
+                    Object value = whereCondition.isTableIndexHelpful(index).getValue();
+                    subTable = index.subTableWhenIndexEquals(value);
+                    updated = true;
+                    break;
+                }
+            }
+            System.err.println("Indexes:" + subTable.getIndexes() + " subtable:" + subTable);
+        } while (updated);
+        System.err.println("Indexes:" + subTable.getIndexes() + " subtable:" + subTable);
+        return subTable;
+    }
+
+    public void updateIndexes() {
+        //Bad running time
+        ArrayList<TableIndex> newIndexes= new ArrayList<TableIndex>();
+        for(TableIndex i: getIndexes()) {
+            newIndexes.add(new TableIndex(this, i.getIndexedField(), i.getName()));
+        }
+        this.setIndexes(newIndexes);
     }
 }

@@ -1,16 +1,14 @@
 package queryRunners.utils;
 
 import db.Record;
+import db.TableIndex;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
-import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.update.Update;
 import queryParsers.utils.DummyVisitor;
 
@@ -20,7 +18,7 @@ import queryParsers.utils.DummyVisitor;
 public class WhereCondition {
     public static String TRUE = "(1 = 1)", FALSE = "(1 = 0)";
     Expression whereExpression;
-    boolean result;
+    boolean evalResult;
 
     public WhereCondition(Expression whereExpression) {
         this.whereExpression = whereExpression;
@@ -42,7 +40,7 @@ public class WhereCondition {
             }
         }
         whereExpression.accept(new WhereConditionExpressionVisitor(record));
-        return result;
+        return evalResult;
     }
 
     @Override
@@ -61,7 +59,7 @@ public class WhereCondition {
         public void visit(EqualsTo equalsTo) {
             Object left = record.getCell(equalsTo.getLeftExpression().toString()).getValue();
             Object right = new ComputableValue(equalsTo.getRightExpression()).compute(record);
-            result = left.equals(right);
+            evalResult = left.equals(right);
         }
 
         @Override
@@ -69,9 +67,9 @@ public class WhereCondition {
             Object left = record.getCell(minorThan.getLeftExpression().toString()).getValue();
             Object right = new ComputableValue(minorThan.getRightExpression()).compute(record);
             if(left instanceof String)
-                result = (((String) left).compareTo((String) right) < 0);
+                evalResult = (((String) left).compareTo((String) right) < 0);
             else
-                result = (Integer) left < (Integer) right;
+                evalResult = (Integer) left < (Integer) right;
         }
 
         @Override
@@ -80,10 +78,10 @@ public class WhereCondition {
             Object right = new ComputableValue(minorThanEquals.getRightExpression()).compute(record);
             if(left instanceof String) {
                 int x = ((String) left).compareTo((String) right);
-                result = (x < 0 || x == 0);
+                evalResult = (x < 0 || x == 0);
             }
             else
-                result = (Integer) left <= (Integer) right;
+                evalResult = (Integer) left <= (Integer) right;
         }
 
         @Override
@@ -91,9 +89,9 @@ public class WhereCondition {
             Object left = record.getCell(greaterThan.getLeftExpression().toString()).getValue();
             Object right = new ComputableValue(greaterThan.getRightExpression()).compute(record);
             if(left instanceof String)
-                result = (((String) left).compareTo((String) right) > 0);
+                evalResult = (((String) left).compareTo((String) right) > 0);
             else
-                result = (Integer) left > (Integer) right;
+                evalResult = (Integer) left > (Integer) right;
         }
 
         @Override
@@ -102,29 +100,109 @@ public class WhereCondition {
             Object right = new ComputableValue(greaterThanEquals.getRightExpression()).compute(record);
             if(left instanceof String) {
                 int x = ((String) left).compareTo((String) right);
-                result = (x > 0 || x == 0);
+                evalResult = (x > 0 || x == 0);
             }
             else
-                result = (Integer) left >= (Integer) right;
+                evalResult = (Integer) left >= (Integer) right;
         }
 
         @Override
         public void visit(AndExpression andExpression) {
             boolean left = new WhereCondition(andExpression.getLeftExpression()).evaluate(record);
             boolean right = new WhereCondition(andExpression.getRightExpression()).evaluate(record);
-            result = (left && right);
+            evalResult = (left && right);
         }
 
         @Override
         public void visit(OrExpression orExpression) {
             boolean left = new WhereCondition(orExpression.getLeftExpression()).evaluate(record);
             boolean right = new WhereCondition(orExpression.getRightExpression()).evaluate(record);
-            result = (left || right);
+            evalResult = (left || right);
         }
 
         @Override
         public void visit(Parenthesis parenthesis) {
-            result = new WhereCondition(parenthesis.getExpression()).evaluate(record);
+            evalResult = new WhereCondition(parenthesis.getExpression()).evaluate(record);
         }
     }
+
+    public IsHelpfulResult isTableIndexHelpful(TableIndex tableIndex) {
+        IsHelpfulResult result = new IsHelpfulResult();
+        whereExpression.accept(new IsTableIndexHelpfulViewer(tableIndex, result));
+        return result;
+    }
+
+    public class IsHelpfulResult {
+        boolean isHelpful;
+        Object value;
+
+        public IsHelpfulResult() {
+            this.isHelpful = false;
+        }
+
+        public IsHelpfulResult(boolean isHelpful, Object value) {
+            this.isHelpful = isHelpful;
+            this.value = value;
+        }
+
+        public boolean isHelpful() {
+            return isHelpful;
+        }
+
+        public void setIsHelpful(boolean isHelpful) {
+            this.isHelpful = isHelpful;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public void setValue(Object value) {
+            this.value = value;
+        }
+    }
+
+    private class IsTableIndexHelpfulViewer extends DummyVisitor {
+        TableIndex tableIndex;
+        IsHelpfulResult result;
+
+        public IsTableIndexHelpfulViewer(TableIndex index, IsHelpfulResult result) {
+            this.tableIndex = index;
+            this.result = result;
+        }
+
+        @Override
+        public void visit(EqualsTo equalsTo) {
+            if(equalsTo.getLeftExpression().toString().equals(tableIndex.getIndexedField().name)) {
+                try {
+                    result.value = new ComputableValue(equalsTo.getRightExpression()).compute(null);
+                    result.isHelpful = true;
+                } catch (NullPointerException e) {
+                    //which means a column is used, and therefore it really isn't helpful
+                }
+            }
+        }
+
+        @Override
+        public void visit(AndExpression andExpression) {
+            IsHelpfulResult left = new WhereCondition(andExpression.getLeftExpression()).isTableIndexHelpful(tableIndex);
+            if(left.isHelpful){
+                result.isHelpful = true;
+                result.value = left.value;
+            }
+            IsHelpfulResult right = new WhereCondition(andExpression.getRightExpression()).isTableIndexHelpful(tableIndex);
+            if(right.isHelpful){
+                result.isHelpful = true;
+                result.value = right.value;
+            }
+        }
+
+        @Override
+        public void visit(Parenthesis parenthesis) {
+            IsHelpfulResult res = new WhereCondition(parenthesis.getExpression()).isTableIndexHelpful(tableIndex);
+            result.isHelpful = res.isHelpful;
+            result.value = res.value;
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package queryManager;
 
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -25,6 +26,8 @@ public class QueryManager {
             return new ParserAndRunner(new DeleteRunner(), new DeleteParser());
         else if(s instanceof Select)
             return new ParserAndRunner(new SelectRunner(), new SelectParser());
+        else if(s instanceof CreateIndex)
+            return new ParserAndRunner(new CreateIndexRunner(), new CreateIndexParser());
         return null;
     }
 
