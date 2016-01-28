@@ -8,14 +8,24 @@ import db.fieldType.FieldType;
 public class Field {
     public String name;
     public FieldType fieldType;
+    public boolean isPrimaryKey;
 
     public Field(String name, FieldType fieldType) {
         this.name = name;
         this.fieldType = fieldType;
+        this.isPrimaryKey = false;
+    }
+
+    public Field(String name, FieldType fieldType, boolean isPrimaryKey) {
+        this.name = name;
+        this.fieldType = fieldType;
+        this.isPrimaryKey = isPrimaryKey;
     }
 
     @Override
     public String toString() {
-        return name + "[" + fieldType + "]";
+        if(isPrimaryKey)
+            return name + "[PK]";
+        return name;
     }
 }

@@ -32,8 +32,7 @@ public class Main {
                 try {
                     if(queryString.equals("exit"))
                         return;
-                    queryString = QueryManager.relax(queryString);
-                    Statement s = CCJSqlParserUtil.parse(queryString);
+                    Statement s = QueryManager.getStatement(queryString);
                     new QueryManager().handleStatement(s);
                 } catch (JSQLParserException e) {
                     Log.error("Invalid input");

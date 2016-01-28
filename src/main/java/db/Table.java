@@ -1,11 +1,9 @@
 package db;
 
-import db.fieldType.FieldType;
 import queryRunners.utils.WhereCondition;
 import utils.Log;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -14,7 +12,7 @@ import java.util.List;
 public class Table {
     private String name;
     private ArrayList<Field> fields = new ArrayList<Field>();
-    public List<Record> records = new ArrayList<Record>();
+    private List<Record> records = new ArrayList<Record>();
     private ArrayList<TableIndex> indexes = new ArrayList<TableIndex>();
 
     public Table() {
@@ -23,20 +21,31 @@ public class Table {
     public Table(String name, ArrayList<Field> fields) {
         this.name = name;
         this.fields = fields;
+        createPrimaryIndex();
     }
 
-    public Table(String name, ArrayList<Field> fields, ArrayList<Record> records) {
-        this.name = name;
-        this.fields = fields;
-        this.records = records;
+    public void createPrimaryIndex() {
+        if(getPrimaryKey() != null)
+            this.createIndex("PRIMARYINDEX", getPrimaryKey());
+    }
+
+    public Field getPrimaryKey(){
+        for(Field f: fields)
+            if(f.isPrimaryKey)
+                return f;
+        return null;
     }
 
     @Override
     public String toString() {
         String r = "@" + name + "{";
         for(Field f: fields)
-            r += f.toString() + " ";
-        r += "}[";
+                r += f.toString() + " ";
+        r += "}{";
+        for(TableIndex index: indexes) {
+            r+=index.getName()+",";
+        }
+        r+="}[";
         for(Record record: records)
             r += record.toString();
         r +="]";
@@ -75,7 +84,11 @@ public class Table {
         this.records = records;
     }
 
-    public int getField(String s) {
+    public Field getFieldByName(String name) {
+        return fields.get(getFieldIndex(name));
+    }
+
+    public int getFieldIndex(String s) {
         for(int i=0; i<fields.size(); i++)
             if(fields.get(i).name.equals(s))
                 return i;
@@ -101,7 +114,11 @@ public class Table {
                     Log.print(r.fieldCells.get(i).getCell().toString() + ",");
             Log.println();
         }
+    }
 
+    public void createIndex(String indexName, Field field) {
+        TableIndex index = new TableIndex(this, field, indexName);
+        indexes.add(index);
     }
 
     public Table getSubTableIfPossible(WhereCondition whereCondition) {

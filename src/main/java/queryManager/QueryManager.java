@@ -1,5 +1,7 @@
 package queryManager;
 
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -49,6 +51,14 @@ public class QueryManager {
     public static String relax(String query) {
         query = query.replaceAll("TRUE", WhereCondition.TRUE);
         query = query.replaceAll("FALSE", WhereCondition.FALSE);
+        query = query.replaceAll("ON UPDATE", "ONUPDATE");
+        query = query.replaceAll("ON DELETE", "ONDELETE");
         return query;
+    }
+
+    public static Statement getStatement(String query) throws JSQLParserException {
+        query = QueryManager.relax(query);
+        Statement s = CCJSqlParserUtil.parse(query);
+        return s;
     }
 }

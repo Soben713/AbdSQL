@@ -14,13 +14,15 @@ public class Log {
     public static void error(Object... objects) {
         if(Main.DEBUG) {
             for(Object object: objects)
-                System.err.print(object.toString() + " ");
+                System.err.print(object + " ");
             System.err.println();
         }
     }
     public static void print(String s) {
         try {
             out.write(s.getBytes());
+            if(Main.DEBUG)
+                out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

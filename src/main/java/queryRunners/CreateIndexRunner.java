@@ -3,7 +3,6 @@ package queryRunners;
 import Exceptions.NoSuchTableException;
 import db.DB;
 import db.Table;
-import db.TableIndex;
 import queryParsers.parsed.ParsedCreateIndex;
 import utils.Log;
 
@@ -15,9 +14,7 @@ public class CreateIndexRunner extends QueryRunner<ParsedCreateIndex> {
     public void run(ParsedCreateIndex parsedQuery) {
         try {
             Table t = DB.getInstance().getTable(parsedQuery.getTableName());
-            TableIndex index = new TableIndex(t,
-                    t.getFields().get(t.getField(parsedQuery.getColumnName())), parsedQuery.getIndexName());
-            t.getIndexes().add(index);
+            t.createIndex(parsedQuery.getIndexName(), t.getFieldByName(parsedQuery.getColumnName()));
             Log.println("INDEX CREATED");
         } catch (NoSuchTableException e) {
             e.printStackTrace();
