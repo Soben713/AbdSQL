@@ -1,6 +1,5 @@
 package queryParsers.parsed;
 
-import net.sf.jsqlparser.statement.select.SelectItem;
 import queryRunners.utils.WhereCondition;
 
 import java.util.ArrayList;
@@ -10,10 +9,10 @@ import java.util.ArrayList;
  */
 public class ParsedSelect extends Parsed {
     private String tableName;
-    private ArrayList<SelectItem> selectItems;
+    private ArrayList<String> selectItems;
     private WhereCondition whereCondition;
 
-    public ParsedSelect(String tableName, ArrayList<SelectItem> selectItems, WhereCondition whereCondition) {
+    public ParsedSelect(String tableName, ArrayList<String> selectItems, WhereCondition whereCondition) {
         this.tableName = tableName;
         this.selectItems = selectItems;
         this.whereCondition = whereCondition;
@@ -35,11 +34,11 @@ public class ParsedSelect extends Parsed {
         this.whereCondition = whereCondition;
     }
 
-    public ArrayList<SelectItem> getSelectItems() {
+    public ArrayList<String> getSelectItems() {
         return selectItems;
     }
 
-    public void setSelectItems(ArrayList<SelectItem> selectItems) {
+    public void setSelectItems(ArrayList<String> selectItems) {
         this.selectItems = selectItems;
     }
 }

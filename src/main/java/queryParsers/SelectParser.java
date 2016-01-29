@@ -26,9 +26,13 @@ public class SelectParser extends QueryParser<Select> {
         public void visit(PlainSelect plainSelect) {
             String tableName = plainSelect.getFromItem().toString();
             WhereCondition whereCondition = new WhereCondition(plainSelect.getWhere());
+            ArrayList<String> selectItems = new ArrayList<String>();
 
-            parsedSelect = new ParsedSelect(tableName,
-                    (ArrayList<SelectItem>) plainSelect.getSelectItems(), whereCondition);
+            for(SelectItem si: plainSelect.getSelectItems()) {
+                selectItems.add(si.toString());
+            }
+
+            parsedSelect = new ParsedSelect(tableName, selectItems, whereCondition);
         }
     }
 }

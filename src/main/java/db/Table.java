@@ -3,37 +3,40 @@ package db;
 import queryRunners.utils.WhereCondition;
 import utils.Log;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by user on 26/01/16 AD.
  */
 public class Table {
     private String name;
-    private ArrayList<Field> fields = new ArrayList<Field>();
+    private final List<Field> fields; //unmodifiable
     private List<Record> records = new ArrayList<Record>();
     private ArrayList<TableIndex> indexes = new ArrayList<TableIndex>();
+    public static final String PRIMARY_INDEX_NAME = "PKINDEX";
+    private final Field primaryKey;
 
-    public Table() {
-    }
-
-    public Table(String name, ArrayList<Field> fields) {
+    /*
+    Constructor with no arguments has no mea
+     */
+    public Table(String name, List<Field> fields, Field primaryKey) {
         this.name = name;
-        this.fields = fields;
-        createPrimaryIndex();
+        this.fields = Collections.unmodifiableList(fields);
+        this.primaryKey = primaryKey;
+
+        if(primaryKey != null)
+            createPrimaryIndex();
     }
 
     public void createPrimaryIndex() {
-        if(getPrimaryKey() != null)
-            this.createIndex("PRIMARYINDEX", getPrimaryKey());
+        if(getPrimaryKey() != null) {
+            Log.error(name, "PK", getPrimaryKey());
+            this.createIndex(PRIMARY_INDEX_NAME, getPrimaryKey());
+        }
     }
 
     public Field getPrimaryKey(){
-        for(Field f: fields)
-            if(f.isPrimaryKey)
-                return f;
-        return null;
+        return primaryKey;
     }
 
     @Override
@@ -68,12 +71,8 @@ public class Table {
         this.indexes = indexes;
     }
 
-    public ArrayList<Field> getFields() {
+    public List<Field> getFields() {
         return fields;
-    }
-
-    public void setFields(ArrayList<Field> fields) {
-        this.fields = fields;
     }
 
     public List<Record> getRecords() {
@@ -124,14 +123,18 @@ public class Table {
     public Table getSubTableIfPossible(WhereCondition whereCondition) {
         boolean updated;
         Table subTable = this;
+        Set<String> handledIndexes = new HashSet<String>();
         do {
             updated = false;
             for(TableIndex index: subTable.getIndexes()) {
-                if(whereCondition.isTableIndexHelpful(index).isHelpful()){
-                    Object value = whereCondition.isTableIndexHelpful(index).getValue();
-                    subTable = index.subTableWhenIndexEquals(value);
-                    updated = true;
-                    break;
+                if(!handledIndexes.contains(index.getName())) {
+                    handledIndexes.add(index.getName());
+                    if (whereCondition.isTableIndexHelpful(index).isHelpful()) {
+                        Object value = whereCondition.isTableIndexHelpful(index).getValue();
+                        subTable = index.subTableWhenIndexEquals(value);
+                        updated = true;
+                        break;
+                    }
                 }
             }
         } while (updated);
@@ -145,5 +148,48 @@ public class Table {
             newIndexes.add(new TableIndex(this, i.getIndexedField(), i.getName()));
         }
         this.setIndexes(newIndexes);
+    }
+
+    public boolean containsKey(Object value) {
+        // TODO: implement better, using the index
+        Field primaryKey = getPrimaryKey();
+        if(primaryKey!=null) {
+            for (Record r : records) {
+                if (r.getCell(primaryKey.name).getValue().equals(value))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<ForeignKey> getForeignKeys() {
+        ArrayList<ForeignKey> res = new ArrayList<ForeignKey>();
+        for(Field f: fields) {
+            if(f instanceof ForeignKey) {
+                res.add((ForeignKey) f);
+            }
+        }
+        return res;
+    }
+
+    public ForeignKey getForeignKeyTo(Table t) {
+        ArrayList<ForeignKey> foreignKeys = getForeignKeys();
+        for(ForeignKey fk: foreignKeys) {
+            if(fk.getReferenceTable().equals(t))
+                return fk;
+        }
+        return null;
+    }
+
+    public void deleteRecord(int i) {
+        for(TableIndex ti: getIndexes())
+            ti.deleteRecord(getRecords().get(i));
+        getRecords().remove(i);
+    }
+
+    public void deleteRecord(Record r) {
+        for(int i=0; i<getRecords().size(); i++)
+            if(records.get(i).equals(r))
+                deleteRecord(i);
     }
 }

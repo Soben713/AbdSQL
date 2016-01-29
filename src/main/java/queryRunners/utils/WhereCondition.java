@@ -30,17 +30,25 @@ public class WhereCondition {
         else if (whereExpression.toString().equals(FALSE))
             return false;
         else if(whereExpression.toString().substring(0, 3).equals("NOT")) {
-            try {
-                String newExpressionString = whereExpression.toString().substring(4);
-                Expression newExpression =
-                        ((Update)(CCJSqlParserUtil.parse("update x set x=y where " + newExpressionString))).getWhere();
-                return !(new WhereCondition(newExpression).evaluate(record));
-            } catch (JSQLParserException e) {
-                e.printStackTrace();
-            }
+            String newExpressionString = whereExpression.toString().substring(4);
+            Expression newExpression = stringToWhereExpression("update x set x=y where " + newExpressionString);
+            return !(new WhereCondition(newExpression).evaluate(record));
         }
         whereExpression.accept(new WhereConditionExpressionVisitor(record));
         return evalResult;
+    }
+
+    public static Expression stringToWhereExpression(String s) {
+        try {
+            return ((Update)(CCJSqlParserUtil.parse("update x set x=y where " + s))).getWhere();
+        } catch (JSQLParserException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static WhereCondition stringToWhereCondition(String s) {
+        return new WhereCondition(stringToWhereExpression(s));
     }
 
     @Override

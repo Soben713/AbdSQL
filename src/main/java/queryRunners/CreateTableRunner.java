@@ -19,6 +19,8 @@ public class CreateTableRunner extends QueryRunner<ParsedCreateTable> {
     @Override
     public void run(ParsedCreateTable parsed) {
         ArrayList<Field> fields = new ArrayList<Field>();
+        Field primaryKeyField = null;
+
         for(ParsedCreateTable.ParsedField pf: parsed.getFields()) {
             FieldType ft = FieldType.getFieldTypeClass(pf.type);
             if(pf instanceof ParsedCreateTable.ParsedForeignKey) {
@@ -33,15 +35,12 @@ public class CreateTableRunner extends QueryRunner<ParsedCreateTable> {
             } else {
                 fields.add(new Field(pf.name, ft));
             }
+            if(pf.name.equals(parsed.getPrimaryKey()))
+                primaryKeyField = fields.get(fields.size()-1);
         }
-        Table t = new Table(parsed.getTableName(), fields);
-        DB.getInstance().tables.put(parsed.getTableName(), t);
 
-        if(parsed.getPrimaryKey() != null) {
-            Field primaryKeyField = t.getFieldByName(parsed.getPrimaryKey());
-            primaryKeyField.isPrimaryKey = true;
-            t.createPrimaryIndex();
-        }
+        Table t = new Table(parsed.getTableName(), fields, primaryKeyField);
+        DB.getInstance().tables.put(parsed.getTableName(), t);
 
         Log.println("TABLE CREATED");
         Log.error("Created:", t);

@@ -18,10 +18,22 @@ public class Record {
         this.fieldCells = fieldCells;
     }
 
-    public Cell getCell(String fieldName) {
+    public FieldCell getPrimaryFieldCell(Table t) {
+        if(t.getPrimaryKey() != null)
+            return getFieldCell(t.getPrimaryKey().name);
+        return null;
+    }
+
+    public FieldCell getFieldCell(String fieldName) {
         for(FieldCell fc: fieldCells)
             if(fc.getField().name.equals(fieldName))
-                return fc.getCell();
+                return fc;
+        return null;
+    }
+
+    public Cell getCell(String fieldName) {
+        if(getFieldCell(fieldName) != null)
+            return getFieldCell(fieldName).getCell();
         return null;
     }
 

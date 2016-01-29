@@ -23,6 +23,25 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 
             Record r = new Record(fieldCells);
 
+            //check c1 constraint
+            FieldCell pfc = r.getPrimaryFieldCell(t);
+            if(pfc != null)
+                if (pfc.getCell().getType().equals(Cell.CellType.NULL) || t.containsKey(pfc.getCell().getValue())) {
+                    Log.println(Log.C1_RULE_VIOLATION);
+                    return;
+                }
+
+            //check c2 constraint
+            for(FieldCell fc: fieldCells) {
+                if(fc.getField() instanceof ForeignKey) {
+                    ForeignKey fk = (ForeignKey) fc.getField();
+                    if(!fk.getReferenceTable().containsKey(fc.getCell().getValue())) {
+                        Log.println(Log.C2_RULE_VIOLATION);
+                        return;
+                    }
+                }
+            }
+
             for(TableIndex index: t.getIndexes())
                 index.insert(r);
 

@@ -19,6 +19,5 @@ public class CreateIndexRunner extends QueryRunner<ParsedCreateIndex> {
         } catch (NoSuchTableException e) {
             e.printStackTrace();
         }
-
     }
 }

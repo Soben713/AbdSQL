@@ -11,6 +11,10 @@ import java.io.OutputStream;
  */
 public class Log {
     public static OutputStream out = new BufferedOutputStream( System.out );
+    public static String C1_RULE_VIOLATION="C1 CONSTRAINT FAILED";
+    public static String C2_RULE_VIOLATION="C2 CONSTRAINT FAILED";
+    public static String FK_RESTRICTS="FOREIGN KEY CONSTRAINT RESTRICTS";
+
     public static void error(Object... objects) {
         if(Main.DEBUG) {
             for(Object object: objects)

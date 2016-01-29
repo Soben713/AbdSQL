@@ -32,7 +32,7 @@ public class TableIndex {
         }
     }
 
-    public void delete(Record record) {
+    public void deleteRecord(Record record) {
         Object recordKey = getRecordsIndexedValue(record);
         if(records.containsKey(recordKey)) {
             ArrayList<Record> possibleRecords = records.get(recordKey);
@@ -48,17 +48,15 @@ public class TableIndex {
     }
 
     public Table subTableWhenIndexEquals(Object value) {
-        Table result = new Table(table.getName(), table.getFields());
+        Table result = new Table(table.getName(), table.getFields(), table.getPrimaryKey());
 
         if(records.containsKey(value))
             for(Record r: records.get(value))
                 result.getRecords().add(r);
 
         for(TableIndex index: table.getIndexes()) {
-            if (!index.equals(this)) {
-                TableIndex i = new TableIndex(result, index.getIndexedField(), index.getName());
-                result.getIndexes().add(i);
-            }
+            TableIndex i = new TableIndex(result, index.getIndexedField(), index.getName());
+            result.getIndexes().add(i);
         }
 
         return result;
