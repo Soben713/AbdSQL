@@ -1,5 +1,6 @@
 package queryRunners.utils;
 
+import db.Cell;
 import db.Record;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -61,13 +62,14 @@ public class ComputableValue {
 
         @Override
         public void visit(Column column) {
-            String s = column.getColumnName();
+            String s = column.toString();
             if(s.charAt(0) == '\"') {
                 //is a string
-                result = column.getColumnName().replaceAll("\"", "");
+                result = s.replaceAll("\"", "");
             } else {
                 //is a column
-                result = record.getCell(column.getColumnName()).getValue();
+                Cell c = record.getCell(s);
+                result = c.getValue();
             }
         }
 

@@ -1,5 +1,6 @@
 package queryParsers;
 
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -33,6 +34,14 @@ public class SelectParser extends QueryParser<Select> {
             }
 
             parsedSelect = new ParsedSelect(tableName, selectItems, whereCondition);
+
+            if(plainSelect.getJoins()!=null){
+                Join join = plainSelect.getJoins().get(0);
+                if(join.isSimple())
+                    parsedSelect.setCartesianTable(join.getRightItem().toString());
+                else
+                    parsedSelect.setJoinedTable(join.getRightItem().toString());
+            }
         }
     }
 }

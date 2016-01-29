@@ -16,7 +16,7 @@ import java.util.Scanner;
  * Created by user on 26/01/16 AD.
  */
 public class Main {
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
 
     public static void main(String args[]) throws Exception {
         try {
