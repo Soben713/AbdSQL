@@ -1,8 +1,10 @@
 package queryRunners;
 
 import Exceptions.NoSuchTableException;
-import com.rits.cloning.Cloner;
-import db.*;
+import db.DB;
+import db.Field;
+import db.Record;
+import db.Table;
 import queryParsers.parsed.ParsedSelect;
 import utils.Log;
 
@@ -26,14 +28,19 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
             for(String selectItem: parsed.getSelectItems()) {
                 fields.add(from.getFieldByName(selectItem));
             }
-            Table resTable = new Table(null, fields, null);
+
+            Table resTable = new Table(null, fields, from.getPrimaryKey());
 
             Table subTable = from.getSubTableIfPossible(parsed.getWhereCondition());
             Log.error("Working on (sub)table:", subTable);
 
             for(Record r: subTable.getRecords()) {
                 if(parsed.getWhereCondition().evaluate(r)){
-                    resTable.getRecords().add(r);
+                    Record nr = new Record();
+                    for(Field field: resTable.getFields()) {
+                        nr.fieldCells.add(r.getFieldCell(field.name));
+                    }
+                    resTable.getRecords().add(nr);
                 }
             }
 

@@ -181,15 +181,15 @@ public class Table {
         return null;
     }
 
-    public void deleteRecord(int i) {
+    public void deleteRecordByIndex(int i) {
         for(TableIndex ti: getIndexes())
             ti.deleteRecord(getRecords().get(i));
         getRecords().remove(i);
     }
 
-    public void deleteRecord(Record r) {
-        for(int i=0; i<getRecords().size(); i++)
-            if(records.get(i).equals(r))
-                deleteRecord(i);
+    public void deleteRecord(Record record) {
+        for(int i=0; i<records.size(); i++)
+            if(records.get(i).equals(record))
+                deleteRecordByIndex(i);
     }
 }
