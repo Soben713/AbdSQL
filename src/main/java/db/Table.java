@@ -39,6 +39,13 @@ public class Table {
         return primaryKey;
     }
 
+    public TableIndex getPrimaryIndex() {
+        for(TableIndex ti: indexes)
+            if(ti.getName().equals(PRIMARY_INDEX_NAME))
+                return ti;
+        return null;
+    }
+
     @Override
     public String toString() {
         String r = "@" + name + "{";
@@ -94,6 +101,16 @@ public class Table {
         return -1;
     }
 
+    private String removeTableName(String s) {
+        String r="";
+        for(int i=0; i<s.length(); i++)
+            if(s.charAt(i) == '.')
+                r = s.substring(i+1);
+        if(r.equals(""))
+            r = s;
+        return r;
+    }
+
     public void printTable() {
         if(records.size()==0){
             Log.println("NO RESULTS");
@@ -101,9 +118,9 @@ public class Table {
         }
         for(int i=0; i<fields.size(); i++)
             if(i==fields.size()-1)
-                Log.print(fields.get(i).name);
+                Log.print(removeTableName(fields.get(i).name));
             else
-                Log.print(fields.get(i).name + ",");
+                Log.print(removeTableName(fields.get(i).name + ","));
         Log.println();
         for(Record r: records) {
             for(int i=0; i<r.fieldCells.size(); i++)

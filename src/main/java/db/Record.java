@@ -24,6 +24,14 @@ public class Record {
         return null;
     }
 
+    public FieldCell getForeignKeyCell(Table recordsTable, Table referenceTable) {
+        if(recordsTable.getForeignKeyTo(referenceTable) != null) {
+            Field f = recordsTable.getForeignKeyTo(referenceTable);
+            return getFieldCell(f.name);
+        }
+        return null;
+    }
+
     public FieldCell getFieldCell(String fieldName) {
         for(FieldCell fc: fieldCells)
             if(fc.getField().name.equals(fieldName))

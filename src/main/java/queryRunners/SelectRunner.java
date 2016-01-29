@@ -24,9 +24,10 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
             if(parsed.getCartesianTable() != null)
                 from = getCartesianProduct(t1, DB.getInstance().getTable(parsed.getCartesianTable()));
             else if(parsed.getJoinedTable() != null)
-                ;
+                from = getJoinedProduct(t1, DB.getInstance().getTable(parsed.getJoinedTable()));
             else
                 from = t1;
+
             ArrayList<Field> fields = new ArrayList<Field>();
 
             for(String selectItem: parsed.getSelectItems()) {
@@ -57,39 +58,68 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
         }
     }
 
-    public Table getCartesianProduct(Table t1, Table t2) {
-        String tableName = t1.getName() + "," + t2.getName();
+    private ArrayList<Field> getJoinedFields(Table t1, Table t2) {
         ArrayList<Field> fields = new ArrayList<Field>();
         for(Field f: t1.getFields())
             fields.add(new Field(t1.getName()+"."+f.name, f.fieldType));
         for(Field f: t2.getFields())
             fields.add(new Field(t2.getName()+"."+f.name, f.fieldType));
+        return fields;
+    }
+
+    private Record getJoinedRecords(Record r1, Record r2, ArrayList<Field> fields, Table t1) {
+        ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
+
+        for(int k=0; k<r1.fieldCells.size(); k++) {
+            FieldCell fc = r1.fieldCells.get(k);
+            fieldCells.add(new FieldCell(fields.get(k), fc.getCell()));
+        }
+
+        for(int k=0; k<r2.fieldCells.size(); k++) {
+            FieldCell fc = r2.fieldCells.get(k);
+            fieldCells.add(new FieldCell(fields.get(t1.getFields().size() + k), fc.getCell()));
+        }
+
+        return new Record(fieldCells);
+    }
+
+    public Table getCartesianProduct(Table t1, Table t2) {
+        String tableName = t1.getName() + "," + t2.getName();
+        ArrayList<Field> fields = getJoinedFields(t1, t2);
 
         Table res = new Table(tableName, fields, null);
 
-        for(int i=0; i<t1.getRecords().size(); i++)
-            for(int j=0; j<t2.getRecords().size(); j++) {
-                Record r1 = t1.getRecords().get(i);
-                Record r2 = t2.getRecords().get(j);
-
-                ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
-
-                for(int k=0; k<r1.fieldCells.size(); k++) {
-                    FieldCell fc = r1.fieldCells.get(k);
-                    fieldCells.add(new FieldCell(fields.get(k), fc.getCell()));
-                }
-
-                for(int k=0; k<r2.fieldCells.size(); k++) {
-                    FieldCell fc = r2.fieldCells.get(k);
-                    fieldCells.add(new FieldCell(fields.get(t1.getFields().size() + k), fc.getCell()));
-                }
-
-                Record r = new Record(fieldCells);
+        for(Record r1: t1.getRecords())
+            for(Record r2: t2.getRecords()) {
+                Record r = getJoinedRecords(r1, r2, fields, t1);
                 res.getRecords().add(r);
             }
 
         Log.error("cartesian:", res);
 
+        return res;
+    }
+
+    public Table getJoinedProduct(Table t1, Table t2) {
+        if(t1.getForeignKeyTo(t2) == null)
+            return getJoinedProduct(t2, t1);
+
+        String tableName = t1.getName() + "joined" + t2.getName();
+        ArrayList<Field> fields = getJoinedFields(t1, t2);
+
+        Table res = new Table(tableName, fields, null);
+
+        t2.updateIndexes();
+
+        for(Record r1: t1.getRecords()) {
+            TableIndex t2Index = t2.getPrimaryIndex();
+            for(Record r2: t2Index.getRecords().get(r1.getForeignKeyCell(t1, t2).getCell().getValue())) {
+                Record r = getJoinedRecords(r1, r2, fields, t1);
+                res.getRecords().add(r);
+            }
+        }
+
+        Log.error("joined:", res);
         return res;
     }
 }
