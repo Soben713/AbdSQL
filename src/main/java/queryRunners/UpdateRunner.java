@@ -38,7 +38,7 @@ public class UpdateRunner extends QueryRunner<ParsedUpdate> {
                             ForeignKey fk = (ForeignKey) fkCell.getField();
                             if(fk.getOnUpdateAction().equals(ForeignKey.Action.RESTRICT)) {
                                 Log.println(Log.FK_RESTRICTS);
-                                continue overRecords;
+                                break overRecords;
                             }
                         }
 

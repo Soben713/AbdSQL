@@ -34,7 +34,7 @@ public class DeleteRunner extends QueryRunner<ParsedDelete> {
                             ForeignKey fk = (ForeignKey) fkCell.getValue2().getField();
                             if (fk.getOnDeleteAction().equals(ForeignKey.Action.RESTRICT)) {
                                 Log.println(Log.FK_RESTRICTS);
-                                continue overRecords;
+                                break overRecords;
                             }
                         }
 
