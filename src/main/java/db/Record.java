@@ -1,7 +1,5 @@
 package db;
 
-import db.fieldType.FieldType;
-
 import java.util.ArrayList;
 
 /**

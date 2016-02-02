@@ -1,22 +1,22 @@
 package main;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
+
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import queryManager.QueryManager;
-import queryRunners.utils.ComputableValue;
-import queryRunners.utils.WhereCondition;
 import utils.Log;
-
-import java.io.*;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 /**
  * Created by user on 26/01/16 AD.
  */
 public class Main {
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
 
     public static void main(String args[]) throws Exception {
         try {
@@ -25,7 +25,7 @@ public class Main {
                 bi = new BufferedReader(new InputStreamReader(System.in));
             }
             else {
-                bi = new BufferedReader(new FileReader(new File("input.txt")));
+                bi = new BufferedReader(new FileReader(new File("input2.txt")));
             }
             String queryString;
             while ((queryString = bi.readLine()) != null) {
