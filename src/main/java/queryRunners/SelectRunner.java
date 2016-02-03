@@ -9,6 +9,9 @@ import db.FieldCell;
 import db.Record;
 import db.Table;
 import db.TableIndex;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import queryParsers.parsed.ParsedSelect;
 import utils.Log;
 
@@ -35,26 +38,39 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 
 			ArrayList<Field> fields = new ArrayList<Field>();
 
-			for (String selectItem : parsed.getSelectItems()) {
-				fields.add(from.getFieldByName(selectItem));
+			for (SelectItem selectItem : parsed.getSelectItems()) {
+				Class<?> c = ((SelectExpressionItem) selectItem).getExpression().getClass();
+				if (c.getSimpleName().equals("Function")) {
+					System.out.println(((Function) ((SelectExpressionItem) selectItem).getExpression()).getName());
+				} else if (c.getSimpleName().equals("Column")) {
+					fields.add(from.getFieldByName(selectItem.toString()));
+				}
 			}
-
-			Table resTable = new Table(null, fields, from.getPrimaryKey());
 
 			Table subTable = from.getSubTableIfPossible(parsed.getWhereCondition());
 			Log.error("Working on (sub)table:", subTable);
 
+			Table tempTable = new Table(null, from.getFields(), from.getPrimaryKey());
+
 			for (Record r : subTable.getRecords()) {
 				if (parsed.getWhereCondition().evaluate(r)) {
 					Record nr = new Record();
-					for (Field field : resTable.getFields()) {
+					for (Field field : subTable.getFields()) {
 						nr.fieldCells.add(r.getFieldCell(field.name));
 					}
-					resTable.getRecords().add(nr);
+					tempTable.getRecords().add(nr);
 				}
 			}
 
-			resTable = parsed.getGroupbyCondition().group(resTable);
+			tempTable = parsed.getGroupbyCondition().group(tempTable);
+			Table resTable = new Table(null, fields, from.getPrimaryKey());
+			for (Record r : tempTable.getRecords()) {
+				Record nr = new Record();
+				for (Field field : fields) {
+					nr.fieldCells.add(r.getFieldCell(field.name));
+				}
+				resTable.getRecords().add(nr);
+			}
 
 			Log.error("Result:", resTable);
 

@@ -5,16 +5,18 @@ import queryRunners.utils.WhereCondition;
 
 import java.util.ArrayList;
 
+import net.sf.jsqlparser.statement.select.SelectItem;
+
 /**
  * Created by user on 27/01/16 AD.
  */
 public class ParsedSelect extends Parsed {
 	private String tableName, joinedTable = null, cartesianTable = null;
-	private ArrayList<String> selectItems;
+	private ArrayList<SelectItem> selectItems;
 	private WhereCondition whereCondition;
 	private GroupbyCondition groupbyCondition;
 
-	public ParsedSelect(String tableName, ArrayList<String> selectItems, WhereCondition whereCondition,
+	public ParsedSelect(String tableName, ArrayList<SelectItem> selectItems, WhereCondition whereCondition,
 			GroupbyCondition groupbyCondition) {
 		this.tableName = tableName;
 		this.selectItems = selectItems;
@@ -38,11 +40,11 @@ public class ParsedSelect extends Parsed {
 		this.whereCondition = whereCondition;
 	}
 
-	public ArrayList<String> getSelectItems() {
+	public ArrayList<SelectItem> getSelectItems() {
 		return selectItems;
 	}
 
-	public void setSelectItems(ArrayList<String> selectItems) {
+	public void setSelectItems(ArrayList<SelectItem> selectItems) {
 		this.selectItems = selectItems;
 	}
 

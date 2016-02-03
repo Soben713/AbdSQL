@@ -31,14 +31,14 @@ public class SelectParser extends QueryParser<Select> {
 		public void visit(PlainSelect plainSelect) {
 			String tableName = plainSelect.getFromItem().toString();
 			WhereCondition whereCondition = new WhereCondition(plainSelect.getWhere());
-			ArrayList<String> selectItems = new ArrayList<String>();
+			ArrayList<SelectItem> selectItems = new ArrayList<SelectItem>();
 			// groupby elements
 			List<Expression> groupbyExpressions = plainSelect.getGroupByColumnReferences();
 			Expression having = plainSelect.getHaving();
 			GroupbyCondition groupbyCondition = new GroupbyCondition(groupbyExpressions, having);
 
 			for (SelectItem si : plainSelect.getSelectItems()) {
-				selectItems.add(si.toString());
+				selectItems.add(si);
 			}
 
 			parsedSelect = new ParsedSelect(tableName, selectItems, whereCondition, groupbyCondition);
