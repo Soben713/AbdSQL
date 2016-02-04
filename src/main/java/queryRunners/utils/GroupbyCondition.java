@@ -8,6 +8,7 @@ import db.Field;
 import db.Record;
 import db.Table;
 import db.TableIndex;
+import db.View;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -39,8 +40,10 @@ public class GroupbyCondition {
 			if (having != null) {
 				groups = evaluateHaving(groups, resTable);
 			}
+			return createTableFromGroups(groups, resTable.getFields(), resTable.getPrimaryKey(), true);
+		} else {
+			return createTableFromGroups(groups, resTable.getFields(), resTable.getPrimaryKey(), false);
 		}
-		return createTableFromGroups(groups, resTable.getFields(), resTable.getPrimaryKey());
 	}
 
 	private ArrayList<Group> evaluateHaving(ArrayList<Group> groups, Table resTable) {
@@ -275,11 +278,19 @@ public class GroupbyCondition {
 		return (Integer) sum / group.getRecords().size();
 	}
 
-	private Table createTableFromGroups(ArrayList<Group> groups, List<Field> fields, Field primaryKey) {
-		Table table = new Table(null, fields, primaryKey);
+	private Table createTableFromGroups(ArrayList<Group> groups, List<Field> fields, Field primaryKey,
+			boolean grouped) {
+		Table table = new Table(null, fields, primaryKey, null);
+		table.setView(new View(table, null, table.getName(), null));
 		ArrayList<Record> records = new ArrayList<Record>();
-		for (Group group : groups) {
-			records.add(group.getRecords().get(0));
+		if (grouped) {
+			for (Group group : groups) {
+				records.add(group.getRecords().get(0));
+			}
+		} else {
+			for (Group group : groups) {
+				records.addAll(group.getRecords());
+			}
 		}
 		table.setRecords(records);
 		return table;
@@ -291,7 +302,7 @@ public class GroupbyCondition {
 		Field primaryKey = originalTable.getPrimaryKey();
 		Field indexedField = originalTable.getFieldByName(expression.toString());
 		for (Group group : groups) {
-			Table temp = new Table(null, fields, primaryKey);
+			Table temp = new Table(null, fields, primaryKey, null);
 			temp.setRecords(group.getRecords());
 			TableIndex ti = new TableIndex(temp, indexedField, null);
 			TreeMap<Object, ArrayList<Record>> mappedRecords = (TreeMap<Object, ArrayList<Record>>) ti.getRecords();

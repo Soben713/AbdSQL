@@ -9,9 +9,11 @@ import db.FieldCell;
 import db.Record;
 import db.Table;
 import db.TableIndex;
+import db.View;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import queryParsers.parsed.ParsedCreateView;
 import queryParsers.parsed.ParsedSelect;
 import utils.Log;
 
@@ -20,7 +22,7 @@ import utils.Log;
  */
 public class SelectRunner extends QueryRunner<ParsedSelect> {
 	@Override
-	public void run(ParsedSelect parsed) {
+	public void run(ParsedSelect parsed, boolean log) {
 		select(parsed).printTable();
 	}
 
@@ -50,7 +52,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 			Table subTable = from.getSubTableIfPossible(parsed.getWhereCondition());
 			Log.error("Working on (sub)table:", subTable);
 
-			Table tempTable = new Table(null, from.getFields(), from.getPrimaryKey());
+			Table tempTable = new Table(null, from.getFields(), from.getPrimaryKey(), null);
 
 			for (Record r : subTable.getRecords()) {
 				if (parsed.getWhereCondition().evaluate(r)) {
@@ -63,7 +65,9 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 			}
 
 			tempTable = parsed.getGroupbyCondition().group(tempTable);
-			Table resTable = new Table(null, fields, from.getPrimaryKey());
+			Table resTable = new Table(null, fields, from.getPrimaryKey(), null);
+			ParsedCreateView parsedCreateView = new ParsedCreateView(parsed, resTable.getName());
+			resTable.setView(new View(resTable, from.getView(), resTable.getName(), parsedCreateView));
 			for (Record r : tempTable.getRecords()) {
 				Record nr = new Record();
 				for (Field field : fields) {
@@ -110,7 +114,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 		String tableName = t1.getName() + "," + t2.getName();
 		ArrayList<Field> fields = getJoinedFields(t1, t2);
 
-		Table res = new Table(tableName, fields, null);
+		Table res = new Table(tableName, fields, null, null);
 
 		for (Record r1 : t1.getRecords())
 			for (Record r2 : t2.getRecords()) {
@@ -130,7 +134,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 		String tableName = t1.getName() + "joined" + t2.getName();
 		ArrayList<Field> fields = getJoinedFields(t1, t2);
 
-		Table res = new Table(tableName, fields, null);
+		Table res = new Table(tableName, fields, null, null);
 
 		t2.updateIndexes();
 

@@ -9,204 +9,224 @@ import java.util.*;
  * Created by user on 26/01/16 AD.
  */
 public class Table {
-    private String name;
-    private final List<Field> fields; //unmodifiable
-    private List<Record> records = new ArrayList<Record>();
-    private ArrayList<TableIndex> indexes = new ArrayList<TableIndex>();
-    public static final String PRIMARY_INDEX_NAME = "PKINDEX";
-    private final Field primaryKey;
+	private String name;
+	private final List<Field> fields; // unmodifiable
+	private List<Record> records = new ArrayList<Record>();
+	private ArrayList<TableIndex> indexes = new ArrayList<TableIndex>();
+	public static final String PRIMARY_INDEX_NAME = "PKINDEX";
+	private final Field primaryKey;
+	private View view;
+	private TreeSet<View> referencedViews;
 
-    /*
-    Constructor with no arguments has no mea
-     */
-    public Table(String name, List<Field> fields, Field primaryKey) {
-        this.name = name;
-        this.fields = Collections.unmodifiableList(fields);
-        this.primaryKey = primaryKey;
+	/*
+	 * Constructor with no arguments has no mea
+	 */
+	public Table(String name, List<Field> fields, Field primaryKey, View view) {
+		this.name = name;
+		this.fields = Collections.unmodifiableList(fields);
+		this.primaryKey = primaryKey;
+		this.view = view;
+		referencedViews = new TreeSet<View>();
 
-        if(primaryKey != null)
-            createPrimaryIndex();
-    }
+		if (primaryKey != null)
+			createPrimaryIndex();
+	}
 
-    public void createPrimaryIndex() {
-        if(getPrimaryKey() != null) {
-            Log.error(name, "PK", getPrimaryKey());
-            this.createIndex(PRIMARY_INDEX_NAME, getPrimaryKey());
-        }
-    }
+	public View getView() {
+		return view;
+	}
 
-    public Field getPrimaryKey(){
-        return primaryKey;
-    }
+	public void setView(View view) {
+		this.view = view;
+	}
 
-    public TableIndex getPrimaryIndex() {
-        for(TableIndex ti: indexes)
-            if(ti.getName().equals(PRIMARY_INDEX_NAME))
-                return ti;
-        return null;
-    }
+	public void addReferenceView(View view) {
+		referencedViews.add(view);
+	}
 
-    @Override
-    public String toString() {
-        String r = "@" + name + "{";
-        for(Field f: fields)
-                r += f.toString() + " ";
-        r += "}{";
-        for(TableIndex index: indexes) {
-            r+=index.getName()+",";
-        }
-        r+="}[";
-        for(Record record: records)
-            r += record.toString();
-        r +="]";
-        return r;
-    }
+	public TreeSet<View> getReferencedViews() {
+		return referencedViews;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void createPrimaryIndex() {
+		if (getPrimaryKey() != null) {
+			Log.error(name, "PK", getPrimaryKey());
+			this.createIndex(PRIMARY_INDEX_NAME, getPrimaryKey());
+		}
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public Field getPrimaryKey() {
+		return primaryKey;
+	}
 
-    public ArrayList<TableIndex> getIndexes() {
-        return indexes;
-    }
+	public TableIndex getPrimaryIndex() {
+		for (TableIndex ti : indexes)
+			if (ti.getName().equals(PRIMARY_INDEX_NAME))
+				return ti;
+		return null;
+	}
 
-    public void setIndexes(ArrayList<TableIndex> indexes) {
-        this.indexes = indexes;
-    }
+	@Override
+	public String toString() {
+		String r = "@" + name + "{";
+		for (Field f : fields)
+			r += f.toString() + " ";
+		r += "}{";
+		for (TableIndex index : indexes) {
+			r += index.getName() + ",";
+		}
+		r += "}[";
+		for (Record record : records)
+			r += record.toString();
+		r += "]";
+		return r;
+	}
 
-    public List<Field> getFields() {
-        return fields;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public List<Record> getRecords() {
-        return records;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setRecords(ArrayList<Record> records) {
-        this.records = records;
-    }
+	public ArrayList<TableIndex> getIndexes() {
+		return indexes;
+	}
 
-    public Field getFieldByName(String name) {
-        return fields.get(getFieldIndex(name));
-    }
+	public void setIndexes(ArrayList<TableIndex> indexes) {
+		this.indexes = indexes;
+	}
 
-    public int getFieldIndex(String s) {
-        for(int i=0; i<fields.size(); i++)
-            if(fields.get(i).name.equals(s))
-                return i;
-        return -1;
-    }
+	public List<Field> getFields() {
+		return fields;
+	}
 
-    private String removeTableName(String s) {
-        String r="";
-        for(int i=0; i<s.length(); i++)
-            if(s.charAt(i) == '.')
-                r = s.substring(i+1);
-        if(r.equals(""))
-            r = s;
-        return r;
-    }
+	public List<Record> getRecords() {
+		return records;
+	}
 
-    public void printTable() {
-        if(records.size()==0){
-            Log.println("NO RESULTS");
-            return;
-        }
-        for(int i=0; i<fields.size(); i++)
-            if(i==fields.size()-1)
-                Log.print(removeTableName(fields.get(i).name));
-            else
-                Log.print(removeTableName(fields.get(i).name + ","));
-        Log.println();
-        for(Record r: records) {
-            for(int i=0; i<r.fieldCells.size(); i++)
-                if(i==r.fieldCells.size()-1)
-                    Log.print(r.fieldCells.get(i).getCell().toString());
-                else
-                    Log.print(r.fieldCells.get(i).getCell().toString() + ",");
-            Log.println();
-        }
-    }
+	public void setRecords(ArrayList<Record> records) {
+		this.records = records;
+	}
 
-    public void createIndex(String indexName, Field field) {
-        TableIndex index = new TableIndex(this, field, indexName);
-        indexes.add(index);
-    }
+	public Field getFieldByName(String name) {
+		return fields.get(getFieldIndex(name));
+	}
 
-    public Table getSubTableIfPossible(WhereCondition whereCondition) {
-        boolean updated;
-        Table subTable = this;
-        Set<String> handledIndexes = new HashSet<String>();
-        do {
-            updated = false;
-            for(TableIndex index: subTable.getIndexes()) {
-                if(!handledIndexes.contains(index.getName())) {
-                    handledIndexes.add(index.getName());
-                    if (whereCondition.isTableIndexHelpful(index).isHelpful()) {
-                        Object value = whereCondition.isTableIndexHelpful(index).getValue();
-                        subTable = index.subTableWhenIndexEquals(value);
-                        updated = true;
-                        break;
-                    }
-                }
-            }
-        } while (updated);
-        return subTable;
-    }
+	public int getFieldIndex(String s) {
+		for (int i = 0; i < fields.size(); i++)
+			if (fields.get(i).name.equals(s))
+				return i;
+		return -1;
+	}
 
-    public void updateIndexes() {
-        //Bad running time
-        ArrayList<TableIndex> newIndexes= new ArrayList<TableIndex>();
-        for(TableIndex i: getIndexes()) {
-            newIndexes.add(new TableIndex(this, i.getIndexedField(), i.getName()));
-        }
-        this.setIndexes(newIndexes);
-    }
+	private String removeTableName(String s) {
+		String r = "";
+		for (int i = 0; i < s.length(); i++)
+			if (s.charAt(i) == '.')
+				r = s.substring(i + 1);
+		if (r.equals(""))
+			r = s;
+		return r;
+	}
 
-    public boolean containsKey(Object value) {
-        // TODO: implement better, using the index
-        Field primaryKey = getPrimaryKey();
-        if(primaryKey!=null) {
-            for (Record r : records) {
-                if (r.getCell(primaryKey.name).getValue().equals(value))
-                    return true;
-            }
-        }
-        return false;
-    }
+	public void printTable() {
+		if (records.size() == 0) {
+			Log.println("NO RESULTS");
+			return;
+		}
+		for (int i = 0; i < fields.size(); i++)
+			if (i == fields.size() - 1)
+				Log.print(removeTableName(fields.get(i).name));
+			else
+				Log.print(removeTableName(fields.get(i).name + ","));
+		Log.println();
+		for (Record r : records) {
+			for (int i = 0; i < r.fieldCells.size(); i++)
+				if (i == r.fieldCells.size() - 1)
+					Log.print(r.fieldCells.get(i).getCell().toString());
+				else
+					Log.print(r.fieldCells.get(i).getCell().toString() + ",");
+			Log.println();
+		}
+	}
 
-    public ArrayList<ForeignKey> getForeignKeys() {
-        ArrayList<ForeignKey> res = new ArrayList<ForeignKey>();
-        for(Field f: fields) {
-            if(f instanceof ForeignKey) {
-                res.add((ForeignKey) f);
-            }
-        }
-        return res;
-    }
+	public void createIndex(String indexName, Field field) {
+		TableIndex index = new TableIndex(this, field, indexName);
+		indexes.add(index);
+	}
 
-    public ForeignKey getForeignKeyTo(Table t) {
-        ArrayList<ForeignKey> foreignKeys = getForeignKeys();
-        for(ForeignKey fk: foreignKeys) {
-            if(fk.getReferenceTable().equals(t))
-                return fk;
-        }
-        return null;
-    }
+	public Table getSubTableIfPossible(WhereCondition whereCondition) {
+		boolean updated;
+		Table subTable = this;
+		Set<String> handledIndexes = new HashSet<String>();
+		do {
+			updated = false;
+			for (TableIndex index : subTable.getIndexes()) {
+				if (!handledIndexes.contains(index.getName())) {
+					handledIndexes.add(index.getName());
+					if (whereCondition.isTableIndexHelpful(index).isHelpful()) {
+						Object value = whereCondition.isTableIndexHelpful(index).getValue();
+						subTable = index.subTableWhenIndexEquals(value);
+						updated = true;
+						break;
+					}
+				}
+			}
+		} while (updated);
+		return subTable;
+	}
 
-    public void deleteRecordByIndex(int i) {
-        for(TableIndex ti: getIndexes())
-            ti.deleteRecord(getRecords().get(i));
-        getRecords().remove(i);
-    }
+	public void updateIndexes() {
+		// Bad running time
+		ArrayList<TableIndex> newIndexes = new ArrayList<TableIndex>();
+		for (TableIndex i : getIndexes()) {
+			newIndexes.add(new TableIndex(this, i.getIndexedField(), i.getName()));
+		}
+		this.setIndexes(newIndexes);
+	}
 
-    public void deleteRecord(Record record) {
-        for(int i=0; i<records.size(); i++)
-            if(records.get(i).equals(record))
-                deleteRecordByIndex(i);
-    }
+	public boolean containsKey(Object value) {
+		// TODO: implement better, using the index
+		Field primaryKey = getPrimaryKey();
+		if (primaryKey != null) {
+			for (Record r : records) {
+				if (r.getCell(primaryKey.name).getValue().equals(value))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	public ArrayList<ForeignKey> getForeignKeys() {
+		ArrayList<ForeignKey> res = new ArrayList<ForeignKey>();
+		for (Field f : fields) {
+			if (f instanceof ForeignKey) {
+				res.add((ForeignKey) f);
+			}
+		}
+		return res;
+	}
+
+	public ForeignKey getForeignKeyTo(Table t) {
+		ArrayList<ForeignKey> foreignKeys = getForeignKeys();
+		for (ForeignKey fk : foreignKeys) {
+			if (fk.getReferenceTable().equals(t))
+				return fk;
+		}
+		return null;
+	}
+
+	public void deleteRecordByIndex(int i) {
+		for (TableIndex ti : getIndexes())
+			ti.deleteRecord(getRecords().get(i));
+		getRecords().remove(i);
+	}
+
+	public void deleteRecord(Record record) {
+		for (int i = 0; i < records.size(); i++)
+			if (records.get(i).equals(record))
+				deleteRecordByIndex(i);
+	}
 }

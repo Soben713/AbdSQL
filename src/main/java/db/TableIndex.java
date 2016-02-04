@@ -48,7 +48,7 @@ public class TableIndex {
 	}
 
 	public Table subTableWhenIndexEquals(Object value) {
-		Table result = new Table(table.getName(), table.getFields(), table.getPrimaryKey());
+		Table result = new Table(table.getName(), table.getFields(), table.getPrimaryKey(), new View(table, null, table.getName(), null));
 
 		if (records.containsKey(value))
 			for (Record r : records.get(value))
