@@ -42,8 +42,8 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 			}
 
 			view = rootView;
-			insert(view, parsedInsert);
-			update(view.getChildrenViews(), parsedInsert);
+			insert(view, parsedInsert, true);
+			insertChildren(view.getChildrenViews(), parsedInsert);
 
 			Log.println("RECORD INSERTED");
 			Log.error("Inserted to:", t);
@@ -52,7 +52,7 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 		}
 	}
 
-	private void insert(View view, ParsedInsert parsedInsert) {
+	private void insert(View view, ParsedInsert parsedInsert, boolean log) {
 		ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
 		List<Field> viewColumns = view.getTable().getFields();
 		int i = 0;
@@ -70,7 +70,8 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 		if (pfc != null)
 			if (pfc.getCell().getType().equals(Cell.CellType.NULL)
 					|| view.getTable().containsKey(pfc.getCell().getValue())) {
-				Log.println(Log.C1_RULE_VIOLATION);
+				if (log)
+					Log.println(Log.C1_RULE_VIOLATION);
 				return;
 			}
 
@@ -79,7 +80,8 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 			if (fc.getField() instanceof ForeignKey) {
 				ForeignKey fk = (ForeignKey) fc.getField();
 				if (!fk.getReferenceTable().containsKey(fc.getCell().getValue())) {
-					Log.println(Log.C2_RULE_VIOLATION);
+					if (log)
+						Log.println(Log.C2_RULE_VIOLATION);
 					return;
 				}
 			}
@@ -91,12 +93,12 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 
 	}
 
-	private void update(ArrayList<View> childrenViews, ParsedInsert parsedInsert) {
+	private void insertChildren(ArrayList<View> childrenViews, ParsedInsert parsedInsert) {
 		if (childrenViews == null)
 			return;
 		for (View child : childrenViews) {
-			insert(child, parsedInsert);
-			update(child.getChildrenViews(), parsedInsert);
+			insert(child, parsedInsert, false);
+			insertChildren(child.getChildrenViews(), parsedInsert);
 		}
 	}
 }

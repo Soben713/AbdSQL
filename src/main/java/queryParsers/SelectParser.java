@@ -1,5 +1,8 @@
 package queryParsers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -9,10 +12,6 @@ import queryParsers.parsed.ParsedSelect;
 import queryParsers.utils.DummyVisitor;
 import queryRunners.utils.GroupbyCondition;
 import queryRunners.utils.WhereCondition;
-import utils.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by user on 27/01/16 AD.

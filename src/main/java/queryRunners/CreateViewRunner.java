@@ -9,10 +9,11 @@ import queryParsers.parsed.ParsedSelect;
 import utils.Log;
 
 public class CreateViewRunner extends QueryRunner<ParsedCreateView> {
+	ParsedSelect select;
 
 	@Override
 	public void run(ParsedCreateView parsedQuery, boolean log) {
-		ParsedSelect select = parsedQuery.parsedSelect;
+		select = parsedQuery.parsedSelect;
 		String viewName = parsedQuery.viewName;
 		View parent = null;
 		try {
@@ -24,15 +25,28 @@ public class CreateViewRunner extends QueryRunner<ParsedCreateView> {
 		result.setName(viewName);
 		View view = new View(result, parent, viewName, parsedQuery);
 		parent.addChild(view);
-		view.setUpdatable(getUpdatableStatus());
+		view.setUpdatable(getUpdatableStatus(view, parent));
 		result.setView(view);
 		DB.getInstance().tables.put(viewName, result);
 		if (log)
 			Log.println("VIEW CREATED");
 	}
 
-	private boolean getUpdatableStatus() {
-		// TODO Auto-generated method stub
+	private boolean getUpdatableStatus(View self, View parent) {
+		if (select.getCartesianTable() != null)
+			return false;
+		if (select.getJoinedTable() != null)
+			return false;
+		if (select.getGroupbyCondition().getGroupbyExpressions() != null)
+			return false;
+		String primary = parent.getTable().getPrimaryKey().name;
+		boolean hasPrimary = false;
+		for (int i = 0; i < self.getTable().getFields().size(); i++) {
+			if (self.getTable().getFields().get(i).name.equals(primary))
+				hasPrimary = true;
+		}
+		if (!hasPrimary)
+			return false;
 		return true;
 	}
 

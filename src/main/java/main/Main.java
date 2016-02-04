@@ -24,7 +24,7 @@ public class Main {
 			if (!DEBUG) {
 				bi = new BufferedReader(new InputStreamReader(System.in));
 			} else {
-				bi = new BufferedReader(new FileReader(new File("input2.txt")));
+				bi = new BufferedReader(new FileReader(new File("input3.txt")));
 			}
 			String queryString;
 			while ((queryString = bi.readLine()) != null) {
