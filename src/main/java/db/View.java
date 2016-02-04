@@ -1,7 +1,8 @@
 package db;
 
+import java.util.ArrayList;
+
 import queryParsers.parsed.ParsedCreateView;
-import queryRunners.CreateViewRunner;
 
 public class View implements Comparable<View> {
 
@@ -10,6 +11,7 @@ public class View implements Comparable<View> {
 	private String name;
 	private boolean updatable;
 	private ParsedCreateView parsedQuery;
+	private ArrayList<View> children;
 
 	public View() {
 
@@ -20,6 +22,7 @@ public class View implements Comparable<View> {
 		this.parent = parent;
 		this.name = name;
 		this.parsedQuery = parsedQuery;
+		children = null;
 		updatable = true;
 	}
 
@@ -37,6 +40,17 @@ public class View implements Comparable<View> {
 
 	public void setParent(View parent) {
 		this.parent = parent;
+	}
+
+	public void addChild(View v) {
+		if (children == null) {
+			children = new ArrayList<View>();
+		}
+		children.add(v);
+	}
+
+	public ArrayList<View> getChildrenViews() {
+		return children;
 	}
 
 	public String getName() {
@@ -61,13 +75,6 @@ public class View implements Comparable<View> {
 
 	public void setParsedQuery(ParsedCreateView parsedQuery) {
 		this.parsedQuery = parsedQuery;
-	}
-
-	public void update() {
-		if (parsedQuery != null) {
-			System.out.println("UPDATEEEEEEEEEEEEE\t" + parsedQuery.viewName);
-			new CreateViewRunner().run(parsedQuery, false);
-		}
 	}
 
 	public int compareTo(View o) {

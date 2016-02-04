@@ -35,61 +35,68 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 			}
 			// now the update is legal!
 			view = t.getView();
-			ArrayList<View> hierarchy = new ArrayList<View>();
-			View temp = view;
-			while (temp != null) {
-				hierarchy.add(temp);
-				view = temp;
-				temp = new View();
-				temp = view.getParent();
+			View rootView = new View();
+			while (view != null) {
+				rootView = view;
+				view = view.getParent();
 			}
-			for (int i = hierarchy.size() - 1; i >= 0; i--) {
-				view = hierarchy.get(i);
-				view.update();
-			}
-			for (int j = 0; j < hierarchy.size(); j++) {
-				view = hierarchy.get(j);
-				ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
-				List<Field> viewColumns = view.getTable().getFields();
-				int i = 0;
-				for (Field field : viewColumns) {
-					if (parsedInsert.selectedColumns.contains(field)) {
-						fieldCells.add(new FieldCell(field, parsedInsert.cells.get(i++)));
-					} else {
-						fieldCells.add(new FieldCell(new Field(field.name, field.fieldType),
-								new Cell(Cell.CellType.NULL, null)));
-					}
-				}
-				Record r = new Record(fieldCells);
-				// check c1 constraint
-				FieldCell pfc = r.getPrimaryFieldCell(view.getTable());
-				if (pfc != null)
-					if (pfc.getCell().getType().equals(Cell.CellType.NULL)
-							|| view.getTable().containsKey(pfc.getCell().getValue())) {
-						Log.println(Log.C1_RULE_VIOLATION);
-						return;
-					}
 
-				// check c2 constraint
-				for (FieldCell fc : fieldCells) {
-					if (fc.getField() instanceof ForeignKey) {
-						ForeignKey fk = (ForeignKey) fc.getField();
-						if (!fk.getReferenceTable().containsKey(fc.getCell().getValue())) {
-							Log.println(Log.C2_RULE_VIOLATION);
-							return;
-						}
-					}
-				}
-				for (TableIndex index : view.getTable().getIndexes()) {
-					index.insert(r);
-				}
-				view.getTable().getRecords().add(r);
-			}
+			view = rootView;
+			insert(view, parsedInsert);
+			update(view.getChildrenViews(), parsedInsert);
 
 			Log.println("RECORD INSERTED");
 			Log.error("Inserted to:", t);
 		} catch (NoSuchTableException e) {
 			Log.error("No such table");
+		}
+	}
+
+	private void insert(View view, ParsedInsert parsedInsert) {
+		ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
+		List<Field> viewColumns = view.getTable().getFields();
+		int i = 0;
+		for (Field field : viewColumns) {
+			if (parsedInsert.selectedColumns.contains(field)) {
+				fieldCells.add(new FieldCell(field, parsedInsert.cells.get(i++)));
+			} else {
+				fieldCells
+						.add(new FieldCell(new Field(field.name, field.fieldType), new Cell(Cell.CellType.NULL, null)));
+			}
+		}
+		Record r = new Record(fieldCells);
+		// check c1 constraint
+		FieldCell pfc = r.getPrimaryFieldCell(view.getTable());
+		if (pfc != null)
+			if (pfc.getCell().getType().equals(Cell.CellType.NULL)
+					|| view.getTable().containsKey(pfc.getCell().getValue())) {
+				Log.println(Log.C1_RULE_VIOLATION);
+				return;
+			}
+
+		// check c2 constraint
+		for (FieldCell fc : fieldCells) {
+			if (fc.getField() instanceof ForeignKey) {
+				ForeignKey fk = (ForeignKey) fc.getField();
+				if (!fk.getReferenceTable().containsKey(fc.getCell().getValue())) {
+					Log.println(Log.C2_RULE_VIOLATION);
+					return;
+				}
+			}
+		}
+		for (TableIndex index : view.getTable().getIndexes()) {
+			index.insert(r);
+		}
+		view.getTable().getRecords().add(r);
+
+	}
+
+	private void update(ArrayList<View> childrenViews, ParsedInsert parsedInsert) {
+		if (childrenViews == null)
+			return;
+		for (View child : childrenViews) {
+			insert(child, parsedInsert);
+			update(child.getChildrenViews(), parsedInsert);
 		}
 	}
 }

@@ -35,22 +35,21 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 				from = getJoinedProduct(t1, DB.getInstance().getTable(parsed.getJoinedTable()));
 			else
 				from = t1;
-			System.out.println("FROMMMMMM " + from.getName());
-			View view = from.getView();
-			ArrayList<View> hierarchy = new ArrayList<View>();
-			View temp = view;
-			while (temp != null) {
-				hierarchy.add(temp);
-				view = temp;
-				temp = new View();
-				temp = view.getParent();
-				// Log.error(" NAMEEEEEEE " + view.getName());
-			}
-			for (int i = hierarchy.size() - 1; i >= 0; i--) {
-				view = hierarchy.get(i);
-				// Log.error(i + " ttttttt " + view.getName());
-				view.update();
-			}
+			// View view = from.getView();
+			// ArrayList<View> hierarchy = new ArrayList<View>();
+			// View temp = view;
+			// while (temp != null) {
+			// hierarchy.add(temp);
+			// view = temp;
+			// temp = new View();
+			// temp = view.getParent();
+			// // Log.error(" NAMEEEEEEE " + view.getName());
+			// }
+			// for (int i = hierarchy.size() - 1; i >= 0; i--) {
+			// view = hierarchy.get(i);
+			// // Log.error(i + " ttttttt " + view.getName());
+			// view.update();
+			// }
 
 			ArrayList<Field> fields = new ArrayList<Field>();
 

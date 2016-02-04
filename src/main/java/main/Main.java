@@ -16,34 +16,36 @@ import utils.Log;
  * Created by user on 26/01/16 AD.
  */
 public class Main {
-    public static boolean DEBUG = true;
+	public static boolean DEBUG = true;
 
-    public static void main(String args[]) throws Exception {
-        try {
-            BufferedReader bi = null;
-            if(!DEBUG) {
-                bi = new BufferedReader(new InputStreamReader(System.in));
-            }
-            else {
-                bi = new BufferedReader(new FileReader(new File("input2.txt")));
-            }
-            String queryString;
-            while ((queryString = bi.readLine()) != null) {
-                try {
-                    if(queryString.equals("exit"))
-                        return;
-                    Statement s = QueryManager.getStatement(queryString);
-                    new QueryManager().handleStatement(s);
-                } catch (JSQLParserException e) {
-                    Log.error("Invalid input");
-                } catch (NoSuchElementException e) {
-                    return;
-                }
-            }
-            Log.flush();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
+	public static void main(String args[]) throws Exception {
+		try {
+			BufferedReader bi = null;
+			if (!DEBUG) {
+				bi = new BufferedReader(new InputStreamReader(System.in));
+			} else {
+				bi = new BufferedReader(new FileReader(new File("input2.txt")));
+			}
+			String queryString;
+			while ((queryString = bi.readLine()) != null) {
+				try {
+					if (queryString.equals("exit"))
+						return;
+					Log.error("##############################");
+					Log.error(queryString);
+					Log.error("##############################");
+					Statement s = QueryManager.getStatement(queryString);
+					new QueryManager().handleStatement(s);
+				} catch (JSQLParserException e) {
+					Log.error("Invalid input");
+				} catch (NoSuchElementException e) {
+					return;
+				}
+			}
+			Log.flush();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
