@@ -10,8 +10,6 @@ import db.Record;
 import db.Table;
 import db.TableIndex;
 import db.View;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import queryParsers.parsed.ParsedCreateView;
 import queryParsers.parsed.ParsedSelect;
@@ -37,16 +35,27 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 				from = getJoinedProduct(t1, DB.getInstance().getTable(parsed.getJoinedTable()));
 			else
 				from = t1;
+			System.out.println("FROMMMMMM " + from.getName());
+			View view = from.getView();
+			ArrayList<View> hierarchy = new ArrayList<View>();
+			View temp = view;
+			while (temp != null) {
+				hierarchy.add(temp);
+				view = temp;
+				temp = new View();
+				temp = view.getParent();
+				// Log.error(" NAMEEEEEEE " + view.getName());
+			}
+			for (int i = hierarchy.size() - 1; i >= 0; i--) {
+				view = hierarchy.get(i);
+				// Log.error(i + " ttttttt " + view.getName());
+				view.update();
+			}
 
 			ArrayList<Field> fields = new ArrayList<Field>();
 
 			for (SelectItem selectItem : parsed.getSelectItems()) {
-				Class<?> c = ((SelectExpressionItem) selectItem).getExpression().getClass();
-				if (c.getSimpleName().equals("Function")) {
-					System.out.println(((Function) ((SelectExpressionItem) selectItem).getExpression()).getName());
-				} else if (c.getSimpleName().equals("Column")) {
-					fields.add(from.getFieldByName(selectItem.toString()));
-				}
+				fields.add(from.getFieldByName(selectItem.toString()));
 			}
 
 			Table subTable = from.getSubTableIfPossible(parsed.getWhereCondition());
@@ -65,7 +74,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 			}
 
 			tempTable = parsed.getGroupbyCondition().group(tempTable);
-			Table resTable = new Table(null, fields, from.getPrimaryKey(), null);
+			Table resTable = new Table(from.getView().getName(), fields, from.getPrimaryKey(), from.getView());
 			ParsedCreateView parsedCreateView = new ParsedCreateView(parsed, resTable.getName());
 			resTable.setView(new View(resTable, from.getView(), resTable.getName(), parsedCreateView));
 			for (Record r : tempTable.getRecords()) {

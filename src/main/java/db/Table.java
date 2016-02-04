@@ -16,7 +16,6 @@ public class Table {
 	public static final String PRIMARY_INDEX_NAME = "PKINDEX";
 	private final Field primaryKey;
 	private View view;
-	private TreeSet<View> referencedViews;
 
 	/*
 	 * Constructor with no arguments has no mea
@@ -26,7 +25,6 @@ public class Table {
 		this.fields = Collections.unmodifiableList(fields);
 		this.primaryKey = primaryKey;
 		this.view = view;
-		referencedViews = new TreeSet<View>();
 
 		if (primaryKey != null)
 			createPrimaryIndex();
@@ -38,14 +36,6 @@ public class Table {
 
 	public void setView(View view) {
 		this.view = view;
-	}
-
-	public void addReferenceView(View view) {
-		referencedViews.add(view);
-	}
-
-	public TreeSet<View> getReferencedViews() {
-		return referencedViews;
 	}
 
 	public void createPrimaryIndex() {

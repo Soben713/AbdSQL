@@ -26,13 +26,7 @@ public class CreateViewRunner extends QueryRunner<ParsedCreateView> {
 		view.setUpdatable(getUpdatableStatus());
 		result.setView(view);
 		DB.getInstance().tables.put(viewName, result);
-		view = result.getView();
-		View rootView = view;
-		while (view != null) {
-			rootView = view;
-			view = view.getParent();
-		}
-		rootView.getTable().addReferenceView(result.getView());
+		System.out.println(DB.getInstance().tables.get(viewName));
 		if (log)
 			Log.println("VIEW CREATED");
 	}

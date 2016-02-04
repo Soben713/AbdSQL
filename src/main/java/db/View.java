@@ -11,6 +11,10 @@ public class View implements Comparable<View> {
 	private boolean updatable;
 	private ParsedCreateView parsedQuery;
 
+	public View() {
+
+	}
+
 	public View(Table table, View parent, String name, ParsedCreateView parsedQuery) {
 		this.table = table;
 		this.parent = parent;
@@ -51,8 +55,19 @@ public class View implements Comparable<View> {
 		this.updatable = updatable;
 	}
 
+	public ParsedCreateView getParsedQuery() {
+		return parsedQuery;
+	}
+
+	public void setParsedQuery(ParsedCreateView parsedQuery) {
+		this.parsedQuery = parsedQuery;
+	}
+
 	public void update() {
-		new CreateViewRunner().run(parsedQuery, false);
+		if (parsedQuery != null) {
+			System.out.println("UPDATEEEEEEEEEEEEE\t" + parsedQuery.viewName);
+			new CreateViewRunner().run(parsedQuery, false);
+		}
 	}
 
 	public int compareTo(View o) {

@@ -1,14 +1,21 @@
 package queryRunners;
 
-import Exceptions.NoSuchTableException;
-import Exceptions.NonUpdatableView;
-import db.*;
-import db.fieldType.FieldType;
-import queryParsers.parsed.ParsedInsert;
-import utils.Log;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import Exceptions.NoSuchTableException;
+import Exceptions.NonUpdatableView;
+import db.Cell;
+import db.DB;
+import db.Field;
+import db.FieldCell;
+import db.ForeignKey;
+import db.Record;
+import db.Table;
+import db.TableIndex;
+import db.View;
+import queryParsers.parsed.ParsedInsert;
+import utils.Log;
 
 /**
  * Created by user on 26/01/16 AD.
@@ -27,10 +34,21 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 					view = view.getParent();
 			}
 			// now the update is legal!
-
-			View rootView = t.getView();
 			view = t.getView();
-			while (view != null) {
+			ArrayList<View> hierarchy = new ArrayList<View>();
+			View temp = view;
+			while (temp != null) {
+				hierarchy.add(temp);
+				view = temp;
+				temp = new View();
+				temp = view.getParent();
+			}
+			for (int i = hierarchy.size() - 1; i >= 0; i--) {
+				view = hierarchy.get(i);
+				view.update();
+			}
+			for (int j = 0; j < hierarchy.size(); j++) {
+				view = hierarchy.get(j);
 				ArrayList<FieldCell> fieldCells = new ArrayList<FieldCell>();
 				List<Field> viewColumns = view.getTable().getFields();
 				int i = 0;
@@ -66,13 +84,8 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 					index.insert(r);
 				}
 				view.getTable().getRecords().add(r);
-				rootView = view;
-				view = view.getParent();
 			}
 
-			for (View v : rootView.getTable().getReferencedViews()) {
-				v.update();
-			}
 			Log.println("RECORD INSERTED");
 			Log.error("Inserted to:", t);
 		} catch (NoSuchTableException e) {
