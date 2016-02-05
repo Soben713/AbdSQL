@@ -73,7 +73,7 @@ public class SelectRunner extends QueryRunner<ParsedSelect> {
 			}
 
 			tempTable = parsed.getGroupbyCondition().group(tempTable);
-			Table resTable = new Table(from.getView().getName(), fields, from.getPrimaryKey(), from.getView());
+			Table resTable = new Table(null, fields, from.getPrimaryKey(), null);
 			ParsedCreateView parsedCreateView = new ParsedCreateView(parsed, resTable.getName());
 			resTable.setView(new View(resTable, from.getView(), resTable.getName(), parsedCreateView));
 			for (Record r : tempTable.getRecords()) {

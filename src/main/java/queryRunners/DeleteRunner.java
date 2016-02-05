@@ -62,8 +62,11 @@ public class DeleteRunner extends QueryRunner<ParsedDelete> {
 			Record r = t.getRecords().get(i);
 			// by the second condition in this if, we check whether this view
 			// accepts this record or not
-			if (parsedDelete.getWhereCondition().evaluate(r)
-					&& baseView.getParsedQuery().parsedSelect.getWhereCondition().evaluate(r)) {
+			if (parsedDelete.getWhereCondition().evaluate(r)) {
+				if (baseView.getParsedQuery() != null) {
+					if (!baseView.getParsedQuery().parsedSelect.getWhereCondition().evaluate(r))
+						continue;
+				}
 				if (t.getPrimaryKey() != null) {
 					// before deleting, check foreignkey restricts
 					ArrayList<Triplet<Table, Record, FieldCell>> fkCells = DB.getAllForeignKeysToPK(t,

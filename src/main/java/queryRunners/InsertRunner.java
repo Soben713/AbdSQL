@@ -44,9 +44,6 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 			view = rootView;
 			insert(view, parsedInsert, true);
 			insertChildren(view.getChildrenViews(), parsedInsert);
-
-			Log.println("RECORD INSERTED");
-			Log.error("Inserted to:", t);
 		} catch (NoSuchTableException e) {
 			Log.error("No such table");
 		}
@@ -90,7 +87,9 @@ public class InsertRunner extends QueryRunner<ParsedInsert> {
 			index.insert(r);
 		}
 		view.getTable().getRecords().add(r);
-
+		if (log)
+			Log.println("RECORD INSERTED");
+		Log.error("Inserted to:", view.getTable());
 	}
 
 	private void insertChildren(ArrayList<View> childrenViews, ParsedInsert parsedInsert) {

@@ -59,8 +59,11 @@ public class UpdateRunner extends QueryRunner<ParsedUpdate> {
 		overRecords: for (Record r : table.getRecords()) {
 			// by the second condition in this if, we check whether this view
 			// accepts this record or not
-			if (parsedQuery.where.evaluate(r)
-					&& baseView.getParsedQuery().parsedSelect.getWhereCondition().evaluate(r)) {
+			if (parsedQuery.where.evaluate(r)) {
+				if (baseView.getParsedQuery() != null) {
+					if (!baseView.getParsedQuery().parsedSelect.getWhereCondition().evaluate(r))
+						continue;
+				}
 				// check foreign key constraint
 				FieldCell fc = r.getFieldCell(parsedQuery.columnName);
 
